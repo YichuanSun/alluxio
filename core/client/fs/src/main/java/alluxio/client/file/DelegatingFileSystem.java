@@ -23,6 +23,7 @@ import alluxio.exception.OpenDirectoryException;
 import alluxio.grpc.CheckAccessPOptions;
 import alluxio.grpc.CreateDirectoryPOptions;
 import alluxio.grpc.CreateFilePOptions;
+import alluxio.grpc.DecommissionWorkerPOptions;
 import alluxio.grpc.DeletePOptions;
 import alluxio.grpc.ExistsPOptions;
 import alluxio.grpc.FreePOptions;
@@ -42,6 +43,7 @@ import alluxio.security.authorization.AclEntry;
 import alluxio.wire.BlockLocationInfo;
 import alluxio.wire.MountPointInfo;
 import alluxio.wire.SyncPointInfo;
+import alluxio.wire.WorkerNetAddress;
 
 import java.io.IOException;
 import java.util.List;
@@ -263,5 +265,12 @@ public class DelegatingFileSystem implements FileSystem {
   @Override
   public void close() throws IOException {
     mDelegatedFileSystem.close();
+  }
+
+  @Override
+  public void decommissionWorker(WorkerNetAddress workerNetAddress,
+                                 DecommissionWorkerPOptions options)
+      throws IOException, AlluxioException, InterruptedException {
+    mDelegatedFileSystem.decommissionWorker(workerNetAddress, options);
   }
 }

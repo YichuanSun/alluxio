@@ -28,6 +28,8 @@ import alluxio.grpc.CreateDirectoryPRequest;
 import alluxio.grpc.CreateDirectoryPResponse;
 import alluxio.grpc.CreateFilePRequest;
 import alluxio.grpc.CreateFilePResponse;
+import alluxio.grpc.DecommissionWorkerPRequest;
+import alluxio.grpc.DecommissionWorkerPResponse;
 import alluxio.grpc.DeletePRequest;
 import alluxio.grpc.DeletePResponse;
 import alluxio.grpc.ExistsPRequest;
@@ -82,6 +84,7 @@ import alluxio.master.file.contexts.CheckConsistencyContext;
 import alluxio.master.file.contexts.CompleteFileContext;
 import alluxio.master.file.contexts.CreateDirectoryContext;
 import alluxio.master.file.contexts.CreateFileContext;
+import alluxio.master.file.contexts.DecommissionWorkerContext;
 import alluxio.master.file.contexts.DeleteContext;
 import alluxio.master.file.contexts.ExistsContext;
 import alluxio.master.file.contexts.FreeContext;
@@ -214,6 +217,16 @@ public final class FileSystemMasterClientServiceHandler
       mFileSystemMaster.free(pathUri, FreeContext.create(request.getOptions().toBuilder()));
       return FreePResponse.newBuilder().build();
     }, "Free", "request=%s", responseObserver, request);
+  }
+
+  @Override
+  public void decommissionWorker(DecommissionWorkerPRequest request,
+      StreamObserver<DecommissionWorkerPResponse> responseObserver) {
+    RpcUtils.call(LOG, () -> {
+      mFileSystemMaster.decommissionWorker(request.getWorkerName(),
+          DecommissionWorkerContext.create(request.getOptions().toBuilder()));
+      return DecommissionWorkerPResponse.newBuilder().setDecommissionSuccessful(true).build();
+    }, "DecommissionWorker", "request=%s", responseObserver, request);
   }
 
   @Override
