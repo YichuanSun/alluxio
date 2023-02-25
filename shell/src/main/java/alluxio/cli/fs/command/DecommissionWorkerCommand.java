@@ -81,22 +81,29 @@ public final class DecommissionWorkerCommand extends AbstractFileSystemCommand {
 
     List<BlockWorkerInfo> cachedWorkers = mFsContext.getCachedWorkers();
 
-    for (BlockWorkerInfo blockWorkerInfo :cachedWorkers)  {
-      if (Objects.equals(blockWorkerInfo.getNetAddress().getHost(), workerHost))  {
-        try {
-          long start = System.currentTimeMillis();
-          mFileSystem.decommissionWorker(blockWorkerInfo.getNetAddress(), options);
-          long duration = System.currentTimeMillis() - start;
-          System.out.printf("Decommission worker %s success, spend: %dms%n",
-              workerHost, duration);
-        } catch (InterruptedException ie) {
-          System.out.println(ie);
-        }
-        return 0;
+    BlockWorkerInfo tempBlockWorkerInfo = NULL;
+    for (BlockWorkerInfo blockWorkerInfo : cachedWorkers) {
+      if (Objects.equals(blockWorkerInfo.getNetAddress().getHost(), workerHost)) {
+        tempBlockWorkerInfo = blockWorkerInfo;
+        break;
       }
     }
 
-    System.out.println("Target worker is not found in Alluxio, please input another name.");
+    if (tempBlockWorkerInfo != NULL)  {
+      try {
+        long start = System.currentTimeMillis();
+        mFileSystem.decommissionWorker(blockWorkerInfo.getNetAddress(), options);
+        long duration = System.currentTimeMillis() - start;
+        System.out.printf("Decommission worker %s success, spend: %dms%n",
+            workerHost, duration);
+      } catch (InterruptedException ie) {
+        System.out.println(ie);
+      }
+    }
+    else {
+      System.out.println("Target worker is not found in Alluxio, please input another name.");
+    }
+    
     return 0;
   }
 
