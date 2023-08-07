@@ -43,7 +43,7 @@ public abstract class CloseableIterator<T> extends CloseableResource<Iterator<T>
    *
    * @param iterator the resource to wrap
    */
-  protected CloseableIterator(Iterator<T> iterator) {
+  CloseableIterator(Iterator<T> iterator) {
     super(iterator);
     mIter = iterator;
   }

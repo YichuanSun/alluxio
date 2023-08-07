@@ -43,14 +43,19 @@ public final class MasterWebUIMetrics implements Serializable {
   private List<JournalDiskInfo> mJournalDiskMetrics;
   private String mJournalLastCheckpointTime;
   private long mJournalEntriesSinceCheckpoint;
-  private String mCacheHit;
+  private String mCacheHitLocal;
+  private String mCacheHitRemote;
   private String mCacheMiss;
+  private String mTotalBytesReadLocal;
+  private String mTotalBytesReadLocalThroughput;
   private String mTotalBytesReadRemote;
   private String mTotalBytesReadRemoteThroughput;
   private String mTotalBytesReadDomainSocket;
   private String mTotalBytesReadDomainSocketThroughput;
   private String mTotalBytesReadUfs;
   private String mTotalBytesReadUfsThroughput;
+  private String mTotalBytesWrittenLocal;
+  private String mTotalBytesWrittenLocalThroughput;
   private String mTotalBytesWrittenRemote;
   private String mTotalBytesWrittenRemoteThroughput;
   private String mTotalBytesWrittenDomainSocket;
@@ -65,12 +70,21 @@ public final class MasterWebUIMetrics implements Serializable {
   }
 
   /**
-   * Gets cache hit.
+   * Gets cache hit local.
+   *
+   * @return the cache hit local
+   */
+  public String getCacheHitLocal() {
+    return mCacheHitLocal;
+  }
+
+  /**
+   * Gets cache hit remote.
    *
    * @return the cache hit remote
    */
-  public String getCacheHit() {
-    return mCacheHit;
+  public String getCacheHitRemote() {
+    return mCacheHitRemote;
   }
 
   /**
@@ -116,6 +130,24 @@ public final class MasterWebUIMetrics implements Serializable {
    */
   public int getMasterUnderfsCapacityUsedPercentage() {
     return mMasterUnderfsCapacityUsedPercentage;
+  }
+
+  /**
+   * Gets total bytes read local.
+   *
+   * @return the total bytes read local
+   */
+  public String getTotalBytesReadLocal() {
+    return mTotalBytesReadLocal;
+  }
+
+  /**
+   * Gets total bytes read local throughput.
+   *
+   * @return the total bytes read local throughput
+   */
+  public String getTotalBytesReadLocalThroughput() {
+    return mTotalBytesReadLocalThroughput;
   }
 
   /**
@@ -170,6 +202,24 @@ public final class MasterWebUIMetrics implements Serializable {
    */
   public String getTotalBytesReadUfsThroughput() {
     return mTotalBytesReadUfsThroughput;
+  }
+
+  /**
+   * Gets total bytes written local.
+   *
+   * @return the total bytes written local
+   */
+  public String getTotalBytesWrittenLocal() {
+    return mTotalBytesWrittenLocal;
+  }
+
+  /**
+   * Gets total bytes written local throughput.
+   *
+   * @return the total bytes written local throughput
+   */
+  public String getTotalBytesWrittenLocalThroughput() {
+    return mTotalBytesWrittenLocalThroughput;
   }
 
   /**
@@ -309,13 +359,24 @@ public final class MasterWebUIMetrics implements Serializable {
   }
 
   /**
-   * Sets cache hit.
+   * Sets cache hit local.
+   *
+   * @param CacheHitLocal the cache hit local
+   * @return the updated masterWebUIMetrics object
+   */
+  public MasterWebUIMetrics setCacheHitLocal(String CacheHitLocal) {
+    mCacheHitLocal = CacheHitLocal;
+    return this;
+  }
+
+  /**
+   * Sets cache hit remote.
    *
    * @param CacheHitRemote the cache hit remote
    * @return the updated masterWebUIMetrics object
    */
-  public MasterWebUIMetrics setCacheHit(String CacheHitRemote) {
-    mCacheHit = CacheHitRemote;
+  public MasterWebUIMetrics setCacheHitRemote(String CacheHitRemote) {
+    mCacheHitRemote = CacheHitRemote;
     return this;
   }
 
@@ -373,6 +434,28 @@ public final class MasterWebUIMetrics implements Serializable {
   public MasterWebUIMetrics setMasterUnderfsCapacityUsedPercentage(
       int MasterUnderfsCapacityUsedPercentage) {
     mMasterUnderfsCapacityUsedPercentage = MasterUnderfsCapacityUsedPercentage;
+    return this;
+  }
+
+  /**
+   * Sets total bytes read local.
+   *
+   * @param TotalBytesReadLocal the total bytes read local
+   * @return the updated masterWebUIMetrics object
+   */
+  public MasterWebUIMetrics setTotalBytesReadLocal(String TotalBytesReadLocal) {
+    mTotalBytesReadLocal = TotalBytesReadLocal;
+    return this;
+  }
+
+  /**
+   * Sets total bytes read local throughput.
+   *
+   * @param TotalBytesReadLocalThroughput the total bytes read local throughput
+   * @return the updated masterWebUIMetrics object
+   */
+  public MasterWebUIMetrics setTotalBytesReadLocalThroughput(String TotalBytesReadLocalThroughput) {
+    mTotalBytesReadLocalThroughput = TotalBytesReadLocalThroughput;
     return this;
   }
 
@@ -441,6 +524,29 @@ public final class MasterWebUIMetrics implements Serializable {
    */
   public MasterWebUIMetrics setTotalBytesReadUfsThroughput(String TotalBytesReadUfsThroughput) {
     mTotalBytesReadUfsThroughput = TotalBytesReadUfsThroughput;
+    return this;
+  }
+
+  /**
+   * Sets total bytes written local.
+   *
+   * @param TotalBytesWrittenLocal the total bytes written local
+   * @return the updated masterWebUIMetrics object
+   */
+  public MasterWebUIMetrics setTotalBytesWrittenLocal(String TotalBytesWrittenLocal) {
+    mTotalBytesWrittenLocal = TotalBytesWrittenLocal;
+    return this;
+  }
+
+  /**
+   * Sets total bytes written local throughput.
+   *
+   * @param TotalBytesWrittenLocalThroughput the total bytes written local throughput
+   * @return the updated masterWebUIMetrics object
+   */
+  public MasterWebUIMetrics setTotalBytesWrittenLocalThroughput(
+      String TotalBytesWrittenLocalThroughput) {
+    mTotalBytesWrittenLocalThroughput = TotalBytesWrittenLocalThroughput;
     return this;
   }
 
@@ -617,18 +723,22 @@ public final class MasterWebUIMetrics implements Serializable {
 
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this)
-        .add("cacheHit", mCacheHit).add("cacheMiss", mCacheMiss)
+    return MoreObjects.toStringHelper(this).add("cacheHitLocal", mCacheHitLocal)
+        .add("cacheHitRemote", mCacheHitRemote).add("cacheMiss", mCacheMiss)
         .add("masterCapacityFreePercentage", mMasterCapacityFreePercentage)
         .add("masterCapacityUsedPercentage", mMasterCapacityUsedPercentage)
         .add("masterUnderfsCapacityFreePercentage", mMasterUnderfsCapacityFreePercentage)
         .add("masterUnderfsCapacityUsedPercentage", mMasterUnderfsCapacityUsedPercentage)
         .add("totalBytesReadDomainSocket", mTotalBytesReadDomainSocket)
         .add("totalBytesReadDomainSocketThroughput", mTotalBytesReadDomainSocketThroughput)
+        .add("totalBytesReadLocal", mTotalBytesReadLocal)
+        .add("totalBytesReadLocalThroughput", mTotalBytesReadLocalThroughput)
         .add("totalBytesReadRemote", mTotalBytesReadRemote)
         .add("totalBytesReadRemoteThroughput", mTotalBytesReadRemoteThroughput)
         .add("totalBytesReadUfs", mTotalBytesReadUfs)
         .add("totalBytesReadUfsThroughput", mTotalBytesReadUfsThroughput)
+        .add("totalBytesWrittenLocal", mTotalBytesWrittenLocal)
+        .add("totalBytesWrittenLocalThroughput", mTotalBytesWrittenLocalThroughput)
         .add("totalBytesWrittenRemote", mTotalBytesWrittenRemote)
         .add("totalBytesWrittenRemoteThroughput", mTotalBytesWrittenRemoteThroughput)
         .add("totalBytesWrittenUfs", mTotalBytesWrittenUfs)

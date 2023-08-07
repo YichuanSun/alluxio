@@ -15,6 +15,7 @@ import alluxio.AlluxioURI;
 import alluxio.Constants;
 import alluxio.PositionReader;
 import alluxio.conf.PropertyKey;
+import alluxio.exception.runtime.UnimplementedRuntimeException;
 import alluxio.retry.RetryPolicy;
 import alluxio.underfs.ObjectUnderFileSystem;
 import alluxio.underfs.UfsDirectoryStatus;
@@ -153,7 +154,7 @@ public class GCSUnderFileSystem extends ObjectUnderFileSystem {
 
   @Override
   public PositionReader openPositionRead(String path, long fileLength) {
-    return new GCSPositionReader(mClient, mBucketName, stripPrefixIfPresent(path), fileLength);
+    throw new UnimplementedRuntimeException("Position read is not implemented");
   }
 
   @Override

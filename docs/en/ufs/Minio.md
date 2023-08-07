@@ -1,15 +1,25 @@
 ---
 layout: global
 title: MinIO
+nickname: MinIO
+group: Storage Integrations
+priority: 10
 ---
 
+* Table of Contents
+{:toc}
 
 This guide describes how to configure Alluxio with [MinIO](https://min.io/) as the
 under storage system.
+Alluxio natively provides the `s3://` scheme (recommended for better performance).
+You can use this scheme to connect Alluxio with a MinIO server.
 
-MinIO is a high-performance, S3 compatible object store. It is built for large scale AI/ML, data lake and database workloads. It runs on-prem and on any cloud (public or private) and from the data center to the edge.
+## Prerequisites
 
-Alluxio natively provides the `s3://` scheme (recommended for better performance). You can use this scheme to connect Alluxio with a MinIO server.
+The Alluxio binaries must be on your machine to proceed.
+You can either
+[compile Alluxio from source]({{ '/en/contributor/Building-Alluxio-From-Source.html' | relativize_url }}),
+or [download the binaries locally]({{ '/en/overview/Getting-Started.html' | relativize_url }}).
 
 ## Setup MinIO
 
@@ -37,7 +47,7 @@ pointing to an AWS S3 endpoint.
 All the fields to be modified in `conf/alluxio-site.properties` file are listed here:
 
 ```properties
-alluxio.dora.client.ufs.root=s3://<MINIO_BUCKET>/<MINIO_DIRECTORY>
+alluxio.master.mount.table.root.ufs=s3://<MINIO_BUCKET>/<MINIO_DIRECTORY>
 alluxio.underfs.s3.endpoint=http://<MINIO_ENDPOINT>/
 alluxio.underfs.s3.disable.dns.buckets=true
 alluxio.underfs.s3.inherit.acl=false
@@ -49,11 +59,11 @@ For these parameters, replace `<MINIO_ENDPOINT>` with the hostname and port of y
 e.g., `http://localhost:9000/`.
 If the port value is left unset, it defaults to port 80 for `http` and 443 for `https`.
 
-## Running Alluxio Locally with MinIO
+## Test the MinIO Configuration
 
 Format and start Alluxio with
 
-```shell
+```console
 $ ./bin/alluxio format
 $ ./bin/alluxio-start.sh local
 ```
@@ -63,7 +73,7 @@ examining the logs to ensure the process is running.
 
 Then, to run tests using some basic Alluxio operations execute the following command:
 
-```shell
+```console
 $ ./bin/alluxio runTests
 ```
 
@@ -78,7 +88,7 @@ See below for a few common cases and their resolutions.
 
 If a message like this is returned, then you'll need to double check the name of the bucket in the
 `alluxio-site.properties` file and make sure that it exists in MinIO.
-The property for the bucket name is controlled by [`alluxio.dora.client.ufs.root`]({{ '/en/reference/Properties-List.html' | relativize_url}}#alluxio.dora.client.ufs.root)
+The property for the bucket name is controlled by [`alluxio.master.mount.table.root.ufs`]({{ '/en/reference/Properties-List.html' | relativize_url}}#alluxio.master.mount.table.root.ufs)
 
 ```
 Exception in thread "main" alluxio.exception.DirectoryNotEmptyException: Failed to delete /default_tests_files (com.amazonaws.services.s3.model.AmazonS3Exception: The specified bucket does not exist (Service: Amazon S3; Status Code: 404; Error Code: NoSuchBucke

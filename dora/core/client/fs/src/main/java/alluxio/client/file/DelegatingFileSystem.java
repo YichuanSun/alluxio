@@ -222,8 +222,7 @@ public class DelegatingFileSystem implements FileSystem {
   }
 
   @Override
-  public PositionReader openPositionRead(AlluxioURI path, OpenFilePOptions options)
-      throws FileDoesNotExistException {
+  public PositionReader openPositionRead(AlluxioURI path, OpenFilePOptions options) {
     return mDelegatedFileSystem.openPositionRead(path, options);
   }
 

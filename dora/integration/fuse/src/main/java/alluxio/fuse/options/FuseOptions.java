@@ -42,7 +42,7 @@ public class FuseOptions {
    * @return the file system options
    */
   public static FuseOptions create(AlluxioConfiguration conf) {
-    return create(conf, FileSystemOptions.Builder.fromConf(conf).build(), false);
+    return create(conf, FileSystemOptions.create(conf), false);
   }
 
   /**
@@ -53,7 +53,7 @@ public class FuseOptions {
    * @return the file system options
    */
   public static FuseOptions create(AlluxioConfiguration conf, boolean updateCheckEnabled) {
-    return create(conf, FileSystemOptions.Builder.fromConf(conf).build(), updateCheckEnabled);
+    return create(conf, FileSystemOptions.create(conf), updateCheckEnabled);
   }
 
   /**

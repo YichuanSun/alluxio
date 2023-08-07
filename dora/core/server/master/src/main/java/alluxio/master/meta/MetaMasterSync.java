@@ -68,8 +68,6 @@ public final class MetaMasterSync implements HeartbeatExecutor {
       if (mMasterId.get() == UNINITIALIZED_MASTER_ID) {
         setIdAndRegister();
       }
-      LOG.debug("Standby master: {} send a heartbeat request to the leader master.",
-          mMasterId.get());
       command = mMasterClient.heartbeat(mMasterId.get());
       handleCommand(command);
     } catch (IOException e) {

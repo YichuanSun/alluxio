@@ -18,6 +18,7 @@ import alluxio.AlluxioURI;
 import alluxio.client.file.FileSystem;
 import alluxio.client.file.URIStatus;
 import alluxio.job.plan.NoopPlanConfig;
+import alluxio.job.plan.load.LoadConfig;
 import alluxio.job.plan.migrate.MigrateConfig;
 import alluxio.job.plan.persist.PersistConfig;
 import alluxio.master.job.metrics.DistributedCmdMetrics;
@@ -44,6 +45,7 @@ public class DistributedCmdTest {
   private static final long NOOP_PLAN_FILE_LENGTH = 4;
   private static final long DEFAULT_ZERO_LENGTH = 0;
 
+  private LoadConfig mLoadJobConfig;
   private MigrateConfig mMigrateJobConfig;
   private PersistConfig mPersistJobConfig;
   private NoopPlanConfig mNoopPlanConfig;
@@ -60,6 +62,7 @@ public class DistributedCmdTest {
 
   @Before
   public void before() throws Exception {
+    mLoadJobConfig = Mockito.mock(LoadConfig.class);
     mMigrateJobConfig = Mockito.mock(MigrateConfig.class);
     mPersistJobConfig = Mockito.mock(PersistConfig.class);
     mNoopPlanConfig = Mockito.mock(NoopPlanConfig.class);
@@ -78,8 +81,13 @@ public class DistributedCmdTest {
   private void mockFsOnConfigs() throws Exception {
     Mockito.when(mLoadURIStatus.getLength()).thenReturn(LOAD_FILE_LENGTH);
 
+    Mockito.when(mLoadJobConfig.getFilePath()).thenReturn(LOAD);
     Mockito.when(mMigrateJobConfig.getSource()).thenReturn(MIGRATE);
     Mockito.when(mPersistJobConfig.getFilePath()).thenReturn(PERSIST);
+
+    Mockito.when(mFileSystem.getStatus(new AlluxioURI(LOAD))).thenReturn(mLoadURIStatus);
+    Mockito.when(mFileSystem.getStatus(new AlluxioURI(LOAD)).getLength())
+            .thenReturn(LOAD_FILE_LENGTH);
 
     Mockito.when(mFileSystem.getStatus(new AlluxioURI(MIGRATE))).thenReturn(mMigrateURIStatus);
     Mockito.when(mFileSystem.getStatus(new AlluxioURI(MIGRATE)).getLength())
@@ -97,6 +105,29 @@ public class DistributedCmdTest {
   }
 
   @Test
+  public void testLoadConfigForCompleteStatus() throws Exception {
+    // Run for load config.
+    DistributedCmdMetrics.incrementForCompleteStatusWithRetry(
+            mLoadJobConfig, mFileSystem, mRetryPolicy);
+
+    // should expect function calls to fileSystem.getStatus(new AlluxioURI(filePath)).getLength()
+    // for LoadConfig only and cooresponding file sizes obtained.
+    double loadFileSize = MetricsSystem.getMetricValue(
+            MetricKey.MASTER_JOB_DISTRIBUTED_LOAD_FILE_SIZE.getName()).getValue();
+    double migrateFileSize = MetricsSystem.getMetricValue(
+            MetricKey.MASTER_MIGRATE_JOB_FILE_SIZE.getName()).getValue();
+    double persistFileSize = MetricsSystem.getMetricValue(
+            MetricKey.MASTER_ASYNC_PERSIST_FILE_SIZE.getName()).getValue();
+
+    assertEquals(loadFileSize, LOAD_FILE_LENGTH, 0); // should equal LOAD_FILE_LENGTH
+    assertEquals(migrateFileSize, DEFAULT_ZERO_LENGTH, 0); // should equal DEFAULT_ZERO_LENGTH
+    assertEquals(persistFileSize, DEFAULT_ZERO_LENGTH, 0); // should equal DEFAULT_ZERO_LENGTH
+
+    //should expect one call to .getStatus
+    Mockito.verify(mFileSystem).getStatus(new AlluxioURI(LOAD));
+  }
+
+  @Test
   public void testMigrateConfigForCompleteStatus() throws Exception {
     // Run for migrate config.
     DistributedCmdMetrics.incrementForCompleteStatusWithRetry(
@@ -104,11 +135,14 @@ public class DistributedCmdTest {
 
     // should expect function calls to fileSystem.getStatus(new AlluxioURI(filePath)).getLength()
     // for MigrateConfig only and cooresponding file sizes obtained.
+    double loadFileSize = MetricsSystem.getMetricValue(
+            MetricKey.MASTER_JOB_DISTRIBUTED_LOAD_FILE_SIZE.getName()).getValue();
     double migrateFileSize = MetricsSystem.getMetricValue(
             MetricKey.MASTER_MIGRATE_JOB_FILE_SIZE.getName()).getValue();
     double persistFileSize = MetricsSystem.getMetricValue(
             MetricKey.MASTER_ASYNC_PERSIST_FILE_SIZE.getName()).getValue();
 
+    assertEquals(loadFileSize, DEFAULT_ZERO_LENGTH, 0); // should equal DEFAULT_ZERO_LENGTH
     assertEquals(migrateFileSize, MIGRATE_FILE_LENGTH, 0); // should equal MIGRATE_FILE_LENGTH
     assertEquals(persistFileSize, DEFAULT_ZERO_LENGTH, 0); // should equal DEFAULT_ZERO_LENGTH
 
@@ -124,11 +158,14 @@ public class DistributedCmdTest {
 
     // should expect function calls to fileSystem.getStatus(new AlluxioURI(filePath)).getLength()
     // for PersistConfig only and cooresponding file sizes obtained.
+    double loadFileSize = MetricsSystem.getMetricValue(
+            MetricKey.MASTER_JOB_DISTRIBUTED_LOAD_FILE_SIZE.getName()).getValue();
     double migrateFileSize = MetricsSystem.getMetricValue(
             MetricKey.MASTER_MIGRATE_JOB_FILE_SIZE.getName()).getValue();
     double persistFileSize = MetricsSystem.getMetricValue(
             MetricKey.MASTER_ASYNC_PERSIST_FILE_SIZE.getName()).getValue();
 
+    assertEquals(loadFileSize, DEFAULT_ZERO_LENGTH, 0); // should equal DEFAULT_ZERO_LENGTH
     assertEquals(migrateFileSize, DEFAULT_ZERO_LENGTH, 0); // should equal DEFAULT_ZERO_LENGTH
     assertEquals(persistFileSize, PERSIST_FILE_LENGTH, 0); // should equal PERSIST_FILE_LENGTH
 
@@ -142,12 +179,15 @@ public class DistributedCmdTest {
     DistributedCmdMetrics.incrementForCompleteStatusWithRetry(
             mNoopPlanConfig, mFileSystem, mRetryPolicy);
 
+    double loadFileSize = MetricsSystem.getMetricValue(
+            MetricKey.MASTER_JOB_DISTRIBUTED_LOAD_FILE_SIZE.getName()).getValue();
     double migrateFileSize = MetricsSystem.getMetricValue(
             MetricKey.MASTER_MIGRATE_JOB_FILE_SIZE.getName()).getValue();
     double persistFileSize = MetricsSystem.getMetricValue(
             MetricKey.MASTER_ASYNC_PERSIST_FILE_SIZE.getName()).getValue();
 
     // Should expect no call to fileSystem.getStatus(new AlluxioURI(filePath)).getLength().
+    assertEquals(loadFileSize, DEFAULT_ZERO_LENGTH, 0); // should equal DEFAULT_ZERO_LENGTH
     assertEquals(migrateFileSize, DEFAULT_ZERO_LENGTH, 0); // should equal DEFAULT_ZERO_LENGTH
     assertEquals(persistFileSize, DEFAULT_ZERO_LENGTH, 0); // should equal DEFAULT_ZERO_LENGTH
 

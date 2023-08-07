@@ -18,7 +18,6 @@ import alluxio.exception.PageNotFoundException;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 
 /**
@@ -135,13 +134,6 @@ public interface PageMetaStore extends CacheStatus {
    * Resets the meta store.
    */
   void reset();
-
-  /**
-   * Gets all pages by the specified File ID.
-   * @param fileId the target file id
-   * @return a set of PageInfo's of this file, otherwise an empty set if not found
-   */
-  Set<PageInfo> getAllPagesByFileId(String fileId);
 
   /**
    * @param pageStoreDir

@@ -1,19 +1,27 @@
 ---
 layout: global
 title: CephFS
+nickname: CephFS
+group: Storage Integrations
+priority: 11
 ---
 
-This guide describes how to configure Alluxio with [CephFS](https://docs.ceph.com/en/latest/cephfs/) as the under storage system. 
+* Table of Contents
+{:toc}
 
-The Ceph File System (CephFS) is a POSIX-compliant file system built on top of Ceph’s distributed object store, RADOS. CephFS endeavors to provide a state-of-the-art, multi-use, highly available, and performant file store for a variety of applications, including traditional use-cases like shared home directories, HPC scratch space, and distributed workflow shared storage.
-
-Alluxio supports two different implementations of under storage system for CephFS:
+This guide describes how to configure Alluxio with CephFS as the under storage system. Alluxio supports
+two different implementations of under storage system for [CephFS](https://docs.ceph.com/en/latest/cephfs/):
 - [cephfs](https://docs.ceph.com/en/latest/cephfs/api/libcephfs-java/)
 - [cephfs-hadoop](https://docs.ceph.com/en/nautilus/cephfs/hadoop/)
 
 ## Prerequisites
 
-### Install Dependencies
+### Deploy Alluxio binary package
+The Alluxio binaries must be on your machine. You can either
+[compile Alluxio]({{ '/en/contributor/Building-Alluxio-From-Source.html' | relativize_url }}), or
+[download the binaries locally]({{ '/en/overview/Getting-Started.html' | relativize_url }}).
+
+### Install Dependences
 According to [ceph packages install](https://docs.ceph.com/en/latest/install/get-packages/) to install below packages:
 
 ```
@@ -24,7 +32,7 @@ libcephfs2
 
 ### Make symbolic links
 
-```shell
+```console
 $ ln -s /usr/lib64/libcephfs_jni.so.1.0.0 /usr/lib64/libcephfs_jni.so
 $ ln -s /usr/lib64/libcephfs.so.2.0.0 /usr/lib64/libcephfs.so
 $ java_path=`which java | xargs readlink | sed 's#/bin/java##g'`
@@ -33,17 +41,17 @@ $ ln -s /usr/share/java/libcephfs.jar $java_path/jre/lib/ext/libcephfs.jar
 
 ### Download CephFS Hadoop jar
 
-```shell
+```console
 $ curl -o $java_path/jre/lib/ext/hadoop-cephfs.jar -s https://download.ceph.com/tarballs/hadoop-cephfs.jar
 ```
 
 ## Basic Setup
 
 Configure Alluxio to use under storage systems by modifying
-`conf/alluxio-site.properties` and `conf/core-site.xml`. If they do not exist, 
+`conf/alluxio-site.properties` and `conf/core-site.xml`. If them do not exist, 
 create the configuration files from the templates
 
-```shell
+```console
 $ cp conf/alluxio-site.properties.template conf/alluxio-site.properties
 $ cp conf/core-site.xml.template conf/core-site.xml
 ```
@@ -124,7 +132,7 @@ Modify `conf/core-site.xml` to include:
 
 Start up Alluxio locally to see that everything works.
 
-```shell
+```console
 $ ./bin/alluxio format
 $ ./bin/alluxio-start.sh local
 ```
@@ -140,14 +148,14 @@ to multiple under storage systems. Alluxio's [Command Line Interface]({{ '/en/op
 
 Issue the following command to use the ufs cephfs:
 
-```shell
+```
 $ ./bin/alluxio fs mkdir /mnt/cephfs
 $ ./bin/alluxio fs mount /mnt/cephfs cephfs://mon1\;mon2\;mon3/
 ```
 
 Run a simple example program:
 
-```shell
+```console
 $ ./bin/alluxio runTests --path cephfs://mon1\;mon2\;mon3/
 ```
 
@@ -173,15 +181,15 @@ to multiple under storage systems. Alluxio's [Command Line Interface]({{ '/en/op
 
 Issue the following command to use the ufs cephfs:
 
-```shell
+```console
 $ ./bin/alluxio fs mkdir /mnt/cephfs-hadoop
 $ ./bin/alluxio fs mount /mnt/cephfs-hadoop ceph://mon1\;mon2\;mon3/
 ```
 
 Run a simple example program:
 
-```shell
-$ ./bin/alluxio runTests --path cephfs://mon1\;mon2\;mon3/
+```console
+./bin/alluxio runTests --path cephfs://mon1\;mon2\;mon3/
 ```
 
 Visit your cephfs to verify the files and directories created by Alluxio exist.

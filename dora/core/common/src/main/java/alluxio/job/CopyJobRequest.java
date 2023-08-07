@@ -20,7 +20,7 @@ import com.google.common.base.Preconditions;
 import javax.annotation.concurrent.ThreadSafe;
 
 /**
- * The request of copying files.
+ * The request of loading files.
  */
 @ThreadSafe
 public class CopyJobRequest implements JobRequest {

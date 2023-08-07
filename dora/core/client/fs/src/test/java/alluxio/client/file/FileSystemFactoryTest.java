@@ -19,7 +19,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import alluxio.SystemPropertyRule;
-import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.conf.AlluxioConfiguration;
 import alluxio.conf.Configuration;
 import alluxio.conf.InstancedConfiguration;
@@ -31,7 +30,6 @@ import alluxio.uri.ZookeeperAuthority;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.Closeable;
@@ -70,9 +68,6 @@ public class FileSystemFactoryTest {
   }
 
   @Test
-  @DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "Jiacheng",
-      comment = "fix master HA or remove if no longer needed")
-  @Ignore
   public void multiMasterFileSystemCacheTest()  {
     try (Closeable p = new SystemPropertyRule(PropertyKey.MASTER_RPC_ADDRESSES.getName(),
         "192.168.0.1:1234,192.168.0.2:1445,192.168.0.3:9943").toResource()) {

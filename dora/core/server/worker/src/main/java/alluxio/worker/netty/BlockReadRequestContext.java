@@ -21,8 +21,6 @@ import javax.annotation.concurrent.NotThreadSafe;
  * Context of {@link BlockReadRequest}.
  */
 @NotThreadSafe
-// TODO(jiacheng): This is not removed because it is used by the FileReadHandler.
-//  It shall be removed together with a refactor on the Dora worker refactor.
 public class BlockReadRequestContext extends ReadRequestContext<BlockReadRequest> {
   private BlockReader mBlockReader;
 

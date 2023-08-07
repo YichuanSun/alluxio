@@ -128,7 +128,6 @@ public class FileWriteHandler extends AbstractWriteHandler<BlockWriteRequestCont
     protected void cleanupRequest(BlockWriteRequestContext context) throws Exception {
       WriteRequest request = context.getRequest();
       mWorker.cleanupSession(request.getSessionId());
-      context.getBlockWriter().abort();
     }
 
     @Override

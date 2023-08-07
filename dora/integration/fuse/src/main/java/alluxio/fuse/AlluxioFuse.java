@@ -55,6 +55,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.annotation.concurrent.ThreadSafe;
@@ -63,23 +64,23 @@ import javax.annotation.concurrent.ThreadSafe;
  * Main entry point to Alluxio-FUSE.
  */
 @ThreadSafe
-public class AlluxioFuse {
+public final class AlluxioFuse {
   private static final Logger LOG = LoggerFactory.getLogger(AlluxioFuse.class);
-  protected static final CommandLineParser PARSER = new DefaultParser();
+  private static final CommandLineParser PARSER = new DefaultParser();
 
-  protected static final String MOUNT_POINT_OPTION_NAME = "m";
-  protected static final String MOUNT_ROOT_UFS_OPTION_NAME = "u";
-  protected static final String MOUNT_OPTIONS_OPTION_NAME = "o";
-  protected static final String HELP_OPTION_NAME = "h";
-  protected static final String UPDATE_CHECK_OPTION_NAME = "c";
+  private static final String MOUNT_POINT_OPTION_NAME = "m";
+  private static final String MOUNT_ROOT_UFS_OPTION_NAME = "u";
+  private static final String MOUNT_OPTIONS_OPTION_NAME = "o";
+  private static final String HELP_OPTION_NAME = "h";
+  private static final String UPDATE_CHECK_OPTION_NAME = "c";
 
-  protected static final Option MOUNT_POINT_OPTION = Option.builder(MOUNT_POINT_OPTION_NAME)
+  private static final Option MOUNT_POINT_OPTION = Option.builder(MOUNT_POINT_OPTION_NAME)
       .hasArg()
       .required(false)
       .longOpt("mount-point")
       .desc("The absolute local filesystem path that standalone Fuse will mount Alluxio path to.")
       .build();
-  protected static final Option MOUNT_ROOT_UFS_OPTION
+  private static final Option MOUNT_ROOT_UFS_OPTION
       = Option.builder(MOUNT_ROOT_UFS_OPTION_NAME)
       .hasArg()
       .required(false)
@@ -92,7 +93,7 @@ public class AlluxioFuse {
           + "local operations like `mkdir /mnt/alluxio-fuse/folder` will be translated to "
           + "`mkdir s3://my_bucket/my_folder/folder`)")
       .build();
-  protected static final Option MOUNT_OPTIONS = Option.builder(MOUNT_OPTIONS_OPTION_NAME)
+  private static final Option MOUNT_OPTIONS = Option.builder(MOUNT_OPTIONS_OPTION_NAME)
       .valueSeparator(',')
       .required(false)
       .hasArgs()
@@ -103,7 +104,7 @@ public class AlluxioFuse {
           + "local_data_cache=<local_cache_directory>,local_cache_size=<size>,"
           + "local_metadata_cache_size=<size>,local_metadata_cache_expire=<timeout>")
       .build();
-  protected static final Option UPDATE_CHECK_OPTION = Option.builder(UPDATE_CHECK_OPTION_NAME)
+  private static final Option UPDATE_CHECK_OPTION = Option.builder(UPDATE_CHECK_OPTION_NAME)
       .required(false)
       .longOpt("update-check")
       .hasArg()
@@ -111,11 +112,11 @@ public class AlluxioFuse {
           + "Disabled by default when connecting to Alluxio system cache or Dora cache. "
           + "Enabled by default when connecting an under storage directly.")
       .build();
-  protected static final Option HELP_OPTION = Option.builder(HELP_OPTION_NAME)
+  private static final Option HELP_OPTION = Option.builder(HELP_OPTION_NAME)
       .required(false)
       .desc("Print this help message")
       .build();
-  protected static final Options OPTIONS = new Options()
+  private static final Options OPTIONS = new Options()
       .addOption(MOUNT_POINT_OPTION)
       .addOption(MOUNT_ROOT_UFS_OPTION)
       .addOption(MOUNT_OPTIONS)
@@ -123,7 +124,7 @@ public class AlluxioFuse {
       .addOption(HELP_OPTION);
 
   // prevent instantiation
-  protected AlluxioFuse() {}
+  private AlluxioFuse() {}
 
   /**
    * Running this class will mount the file system according to the options passed to this function.
@@ -249,7 +250,7 @@ public class AlluxioFuse {
    * @param cli the command line inputs
    * @param conf the modifiable configuration to update
    */
-  protected static void setConfigurationFromInput(CommandLine cli, InstancedConfiguration conf) {
+  private static void setConfigurationFromInput(CommandLine cli, InstancedConfiguration conf) {
     if (cli.hasOption(MOUNT_POINT_OPTION_NAME)) {
       conf.set(PropertyKey.FUSE_MOUNT_POINT,
           cli.getOptionValue(MOUNT_POINT_OPTION_NAME), Source.RUNTIME);
@@ -323,29 +324,23 @@ public class AlluxioFuse {
     }
   }
 
-  protected static FuseOptions getFuseOptions(CommandLine cli, AlluxioConfiguration conf) {
+  private static FuseOptions getFuseOptions(CommandLine cli, AlluxioConfiguration conf) {
     boolean updateCheckEnabled = false;
     if (cli.hasOption(UPDATE_CHECK_OPTION_NAME)) {
       updateCheckEnabled = Boolean.parseBoolean(cli.getOptionValue(UPDATE_CHECK_OPTION_NAME));
-    } else if (!conf.getBoolean(PropertyKey.DORA_ENABLED)
+    } else if (!conf.getBoolean(PropertyKey.DORA_CLIENT_READ_LOCATION_POLICY_ENABLED)
         && cli.hasOption(MOUNT_ROOT_UFS_OPTION_NAME)) {
       // Standalone FUSE SDK without distributed cache
       updateCheckEnabled = true;
     }
-    if (cli.hasOption(MOUNT_ROOT_UFS_OPTION_NAME)
-        && !cli.getOptionValue(MOUNT_ROOT_UFS_OPTION_NAME).startsWith(Constants.SCHEME)) {
-      final UfsFileSystemOptions ufsFileSystemOptions =
-          new UfsFileSystemOptions(cli.getOptionValue(MOUNT_ROOT_UFS_OPTION_NAME));
-      final FileSystemOptions fileSystemOptions = FileSystemOptions.Builder.fromConf(conf)
-          .setUfsFileSystemOptions(ufsFileSystemOptions)
-          .build();
-      return FuseOptions.create(conf, fileSystemOptions, updateCheckEnabled);
-    } else {
-      return FuseOptions.create(conf, updateCheckEnabled);
-    }
+    return cli.hasOption(MOUNT_ROOT_UFS_OPTION_NAME)
+        && !cli.getOptionValue(MOUNT_ROOT_UFS_OPTION_NAME).startsWith(Constants.SCHEME)
+        ? FuseOptions.create(conf, FileSystemOptions.create(conf,
+        Optional.of(new UfsFileSystemOptions(cli.getOptionValue(MOUNT_ROOT_UFS_OPTION_NAME)))),
+        updateCheckEnabled) : FuseOptions.create(conf, updateCheckEnabled);
   }
 
-  protected static void validateFuseConfAndOptions(AlluxioConfiguration conf, FuseOptions options) {
+  private static void validateFuseConfAndOptions(AlluxioConfiguration conf, FuseOptions options) {
     String mountPoint = conf.getString(PropertyKey.FUSE_MOUNT_POINT);
     if (mountPoint.isEmpty()) {
       throw new InvalidArgumentRuntimeException(
@@ -367,7 +362,7 @@ public class AlluxioFuse {
   /**
    * Starts jvm monitor process, to monitor jvm.
    */
-  protected static void startJvmMonitorProcess() {
+  private static void startJvmMonitorProcess() {
     if (Configuration.getBoolean(PropertyKey.STANDALONE_FUSE_JVM_MONITOR_ENABLED)) {
       JvmPauseMonitor jvmPauseMonitor = new JvmPauseMonitor(
           Configuration.getMs(PropertyKey.JVM_MONITOR_SLEEP_INTERVAL_MS),

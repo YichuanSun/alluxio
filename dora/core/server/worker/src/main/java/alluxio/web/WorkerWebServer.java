@@ -57,25 +57,12 @@ public final class WorkerWebServer extends WebServer {
    */
   public WorkerWebServer(InetSocketAddress webAddress, final WorkerProcess workerProcess,
       DataWorker worker) {
-    this(webAddress, workerProcess, worker, FileSystem.Factory.create());
-  }
-
-  /**
-   * Creates a new instance of {@link WorkerWebServer}.
-   *
-   * @param webAddress the service address
-   * @param workerProcess the Alluxio worker process
-   * @param worker block worker to manage blocks
-   * @param fileSystem the filesystem
-   */
-  public WorkerWebServer(InetSocketAddress webAddress, final WorkerProcess workerProcess,
-      DataWorker worker, FileSystem fileSystem) {
     super("Alluxio worker web service", webAddress);
     Preconditions.checkNotNull(worker, "Block worker cannot be null");
     // REST configuration
     ResourceConfig config = new ResourceConfig().packages("alluxio.worker", "alluxio.worker.block")
         .register(JacksonProtobufObjectMapperProvider.class);
-    mFileSystem = fileSystem;
+    mFileSystem = FileSystem.Factory.create();
 
     // Override the init method to inject a reference to AlluxioWorker into the servlet context.
     // ServletContext may not be modified until after super.init() is called.

@@ -101,7 +101,7 @@ public class LocalPageStoreDir extends QuotaManagedPageStoreDir {
 
   /**
    * @param path path of a file
-   * @return the corresponding page info for the file otherwise empty
+   * @return the corresponding page info for the file otherwise null
    */
   private Optional<PageInfo> getPageInfo(Path path) {
     Optional<PageId> pageId = getPageId(path);
@@ -114,47 +114,22 @@ public class LocalPageStoreDir extends QuotaManagedPageStoreDir {
         createdTime = creationTime.toMillis();
       } catch (IOException e) {
         LOG.error("Failed to get file size for " + path, e);
-        deleteUnrecognizedPage(path);
         return Optional.empty();
       }
       return Optional.of(new PageInfo(pageId.get(),
           pageSize, CacheScope.GLOBAL, this, createdTime));
     }
-    deleteUnrecognizedPage(path);
     return Optional.empty();
   }
 
   /**
-   * Deletes an unrecognized page file due to various reasons.
-   * @param path the file path of a page file
-   */
-  private void deleteUnrecognizedPage(Path path) {
-    Preconditions.checkState(path.startsWith(getRootPath()),
-        String.format("%s is not inside the cache dir (%s)!", path, getRootPath()));
-    try {
-      Files.delete(path);
-    } catch (IOException e) {
-      // ignore.
-    }
-  }
-
-  /**
    * @param path path of a file
-   * @return the corresponding page id, or empty if the file name does not match the pattern
+   * @return the corresponding page id, or null if the file name does not match the pattern
    */
   private Optional<PageId> getPageId(Path path) {
     Matcher matcher = mPagePattern.matcher(path.toString());
     if (!matcher.matches()) {
-      // @TODO(hua) define the mPagePattern and TEMP page Pattern as static class member to save
-      // CPU time and memory footprint.
-      if (Pattern.matches(String.format("%s/%d/%s/([^/]+)/(\\d+)",
-          Pattern.quote(mPageStoreOptions.getRootDir().toString()),
-          mPageStoreOptions.getPageSize(), LocalPageStore.TEMP_DIR), path.toString())) {
-        LOG.info("TEMP page file " + path + " is going to be deleted.");
-      } else {
-        LOG.error("Unrecognized page file " + path + "is going to be deleted.");
-      }
-      deleteUnrecognizedPage(path);
+      LOG.error("Unrecognized page file " + path);
       return Optional.empty();
     }
     try {
@@ -162,7 +137,6 @@ public class LocalPageStoreDir extends QuotaManagedPageStoreDir {
       String fileId = Preconditions.checkNotNull(matcher.group(2));
       if (!fileBucket.equals(getFileBucket(mFileBuckets, fileId))) {
         LOG.error("Bucket number mismatch " + path);
-        deleteUnrecognizedPage(path);
         return Optional.empty();
       }
       String fileName = Preconditions.checkNotNull(matcher.group(3));
@@ -170,7 +144,6 @@ public class LocalPageStoreDir extends QuotaManagedPageStoreDir {
       return Optional.of(new PageId(fileId, pageIndex));
     } catch (NumberFormatException e) {
       LOG.error("Illegal numbers in path " + path);
-      deleteUnrecognizedPage(path);
       return Optional.empty();
     }
   }

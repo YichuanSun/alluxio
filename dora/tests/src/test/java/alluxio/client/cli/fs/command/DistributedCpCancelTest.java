@@ -14,7 +14,6 @@ package alluxio.client.cli.fs.command;
 import alluxio.AlluxioURI;
 import alluxio.Constants;
 import alluxio.UnderFileSystemFactoryRegistryRule;
-import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.client.WriteType;
 import alluxio.client.cli.fs.AbstractFileSystemShellTest;
 import alluxio.job.plan.migrate.MigrateConfig;
@@ -27,7 +26,6 @@ import com.google.common.collect.Sets;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -38,9 +36,6 @@ import java.io.FileWriter;
 /**
  * Tests for cancel functionality of {@link alluxio.cli.fs.command.DistributedCpCommand}.
  */
-@Ignore
-@DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "jianjian",
-    comment = "fix or remove these tests")
 public final class DistributedCpCancelTest extends AbstractFileSystemShellTest {
   private static final long SLEEP_MS = Constants.SECOND_MS * 30;
   private static final int TEST_TIMEOUT = Constants.SECOND_MS * 90;

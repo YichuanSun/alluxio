@@ -16,7 +16,7 @@
   <parent>
     <artifactId>alluxio-integration-tools</artifactId>
     <groupId>org.alluxio</groupId>
-    <version>303-SNAPSHOT</version>
+    <version>301-SNAPSHOT</version>
   </parent>
 
   <artifactId>alluxio-integration-tools-hms</artifactId>
@@ -29,7 +29,9 @@
     <!-- The following paths need to be defined here as well as in the parent pom so that mvn can -->
     <!-- run properly from sub-project directories -->
     <build.path>${project.parent.parent.parent.parent.basedir}/build</build.path>
+    <lib.jar.name>${project.artifactId}-${project.version}.jar</lib.jar.name>
     <failIfNoTests>false</failIfNoTests>
+    <hive-metastore.version>3.1.2</hive-metastore.version>
   </properties>
 
   <dependencies>
@@ -41,6 +43,8 @@
     <dependency>
       <groupId>org.apache.hive</groupId>
       <artifactId>hive-metastore</artifactId>
+      <version>${hive-metastore.version}</version>
+      <scope>compile</scope>
       <exclusions>
         <!-- Remove dependencies Alluxio has already -->
         <exclusion>
@@ -126,23 +130,18 @@
         </executions>
       </plugin>
       <plugin>
-        <artifactId>exec-maven-plugin</artifactId>
-        <groupId>org.codehaus.mojo</groupId>
-        <inherited>false</inherited>
+        <groupId>com.coderplus.maven.plugins</groupId>
+        <artifactId>copy-rename-maven-plugin</artifactId>
         <executions>
           <execution>
-            <id>copy-lib-jars-selectively</id>
+            <id>copy-and-rename-file</id>
             <phase>install</phase>
             <goals>
-              <goal>exec</goal>
+              <goal>copy</goal>
             </goals>
             <configuration>
-              <executable>${build.path}/lib/copy_jars.sh</executable>
-              <arguments>
-                <argument>${project.artifactId}</argument>
-                <argument>${basedir}/target/${project.artifactId}-${project.version}.jar</argument>
-                <argument>${build.path}/../lib/${project.artifactId}-${project.version}.jar</argument>
-              </arguments>
+              <sourceFile>${basedir}/target/${project.artifactId}-${project.version}.jar</sourceFile>
+              <destinationFile>${project.parent.parent.parent.parent.basedir}/lib/${lib.jar.name}</destinationFile>
             </configuration>
           </execution>
         </executions>
@@ -152,7 +151,7 @@
         <configuration>
           <filesets>
             <fileset>
-              <directory>${build.path}/../lib</directory>
+              <directory>${basedir}/../../../../lib</directory>
               <includes>
                 <include>**/${project.artifactId}-*.jar</include>
               </includes>

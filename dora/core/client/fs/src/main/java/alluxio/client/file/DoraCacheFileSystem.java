@@ -13,10 +13,12 @@ package alluxio.client.file;
 
 import alluxio.AlluxioURI;
 import alluxio.CloseableSupplier;
+import alluxio.Constants;
 import alluxio.PositionReader;
 import alluxio.annotation.SuppressFBWarnings;
 import alluxio.client.ReadType;
 import alluxio.client.file.dora.DoraCacheClient;
+import alluxio.client.file.dora.WorkerLocationPolicy;
 import alluxio.client.file.options.OutStreamOptions;
 import alluxio.client.file.ufs.UfsBaseFileSystem;
 import alluxio.collections.Pair;
@@ -79,10 +81,7 @@ public class DoraCacheFileSystem extends DelegatingFileSystem {
   private final DoraCacheClient mDoraClient;
   private final FileSystemContext mFsContext;
   private final boolean mMetadataCacheEnabled;
-  private final boolean mUfsFallbackEnabled;
   private final long mDefaultVirtualBlockSize;
-
-  private final boolean mClientWriteToUFSEnabled;
 
   /**
    * DoraCacheFileSystem Factory.
@@ -111,7 +110,7 @@ public class DoraCacheFileSystem extends DelegatingFileSystem {
    * @param context
    */
   public DoraCacheFileSystem(FileSystem fs, FileSystemContext context) {
-    this(fs, context, new DoraCacheClient(context));
+    this(fs, context, new DoraCacheClient(context, new WorkerLocationPolicy(2000)));
   }
 
   protected DoraCacheFileSystem(FileSystem fs, FileSystemContext context,
@@ -121,12 +120,8 @@ public class DoraCacheFileSystem extends DelegatingFileSystem {
     mFsContext = context;
     mMetadataCacheEnabled = context.getClusterConf()
         .getBoolean(PropertyKey.DORA_CLIENT_METADATA_CACHE_ENABLED);
-    mUfsFallbackEnabled = context.getClusterConf()
-        .getBoolean(PropertyKey.DORA_CLIENT_UFS_FALLBACK_ENABLED);
     mDefaultVirtualBlockSize = context.getClusterConf()
         .getBytes(PropertyKey.USER_BLOCK_SIZE_BYTES_DEFAULT);
-    mClientWriteToUFSEnabled = context.getClusterConf()
-        .getBoolean(PropertyKey.CLIENT_WRITE_TO_UFS_ENABLED);
   }
 
   @Override
@@ -148,9 +143,6 @@ public class DoraCacheFileSystem extends DelegatingFileSystem {
           throw new FileDoesNotExistException(ufsFullPath);
         }
       }
-      if (!mUfsFallbackEnabled) {
-        throw ex;
-      }
       UFS_FALLBACK_COUNTER.inc();
       LOG.debug("Dora client get status error ({} times). Fall back to UFS.",
           UFS_FALLBACK_COUNTER.getCount(), ex);
@@ -165,7 +157,9 @@ public class DoraCacheFileSystem extends DelegatingFileSystem {
       return mDelegatedFileSystem.getStatus(ufsPath, options);
     }
     try {
-      // TODO(Jiacheng Liu): use path conf if that is still needed
+      // TODO(Jiacheng Liu): implement getPathConf(ufsPath) and use the merged options in the call
+      //  GetStatusPOptions mergedOptions = FileSystemOptionsUtils.getStatusDefaults(
+      //    mFsContext.getPathConf(path)).toBuilder().mergeFrom(options).build();
       return mDoraClient.getStatus(ufsPath.asString(), options);
     } catch (RuntimeException ex) {
       if (ex instanceof StatusRuntimeException) {
@@ -215,9 +209,6 @@ public class DoraCacheFileSystem extends DelegatingFileSystem {
               .build();
       return mDoraClient.getInStream(status, openUfsBlockOptions);
     } catch (RuntimeException ex) {
-      if (!mUfsFallbackEnabled) {
-        throw ex;
-      }
       UFS_FALLBACK_COUNTER.inc();
       LOG.debug("Dora client open file error ({} times). Fall back to UFS.",
           UFS_FALLBACK_COUNTER.getCount(), ex);
@@ -275,9 +266,6 @@ public class DoraCacheFileSystem extends DelegatingFileSystem {
           return Collections.emptyList();
         }
       }
-      if (!mUfsFallbackEnabled) {
-        throw ex;
-      }
 
       UFS_FALLBACK_COUNTER.inc();
       LOG.debug("Dora client list status error ({} times). Fall back to UFS.",
@@ -326,25 +314,25 @@ public class DoraCacheFileSystem extends DelegatingFileSystem {
       outStreamOptions.setMountId(status.getMountId());
       outStreamOptions.setAcl(status.getAcl());
 
-      FileOutStream ufsOutStream;
-      if (mClientWriteToUFSEnabled) {
-        // create an output stream to UFS.
-        ufsOutStream = mDelegatedFileSystem.createFile(ufsFullPath, options);
-      } else {
-        ufsOutStream = null;
-      }
+      FileOutStream ufsOutStream = mDelegatedFileSystem.createFile(ufsFullPath, options);
 
       FileOutStream doraOutStream = mDoraClient.getOutStream(ufsFullPath, mFsContext,
           outStreamOptions, ufsOutStream, uuid);
 
-      return doraOutStream;
+      if (Constants.ENABLE_DORA_WRITE) {
+        return doraOutStream;
+      } else {
+        doraOutStream.close();
+        return ufsOutStream;
+      }
     } catch (Exception e) {
       // TODO(JiamingMai): delete the file
       // delete(alluxioPath);
       UFS_FALLBACK_COUNTER.inc();
       LOG.debug("Dora client CreateFile error ({} times). Fall back to UFS.",
           UFS_FALLBACK_COUNTER.getCount(), e);
-      return mDelegatedFileSystem.createFile(ufsFullPath, options);
+      //return mDelegatedFileSystem.createFile(ufsFullPath, options);
+      throw e;
     }
   }
 
@@ -358,9 +346,6 @@ public class DoraCacheFileSystem extends DelegatingFileSystem {
 
       mDoraClient.createDirectory(ufsFullPath.toString(), mergedOptions);
     } catch (RuntimeException ex) {
-      if (!mUfsFallbackEnabled) {
-        throw ex;
-      }
       UFS_FALLBACK_COUNTER.inc();
       LOG.debug("Dora client createDirectory error ({} times). Fall back to UFS.",
           UFS_FALLBACK_COUNTER.getCount(), ex);
@@ -379,9 +364,6 @@ public class DoraCacheFileSystem extends DelegatingFileSystem {
 
       mDoraClient.delete(ufsFullPath.toString(), mergedOptions);
     } catch (RuntimeException ex) {
-      if (!mUfsFallbackEnabled) {
-        throw ex;
-      }
       UFS_FALLBACK_COUNTER.inc();
       LOG.debug("Dora client delete error ({} times). Fall back to UFS.",
           UFS_FALLBACK_COUNTER.getCount(), ex);
@@ -400,9 +382,6 @@ public class DoraCacheFileSystem extends DelegatingFileSystem {
 
       mDoraClient.rename(srcUfsFullPath.toString(), dstUfsFullPath.toString(), mergedOptions);
     } catch (RuntimeException ex) {
-      if (!mUfsFallbackEnabled) {
-        throw ex;
-      }
       UFS_FALLBACK_COUNTER.inc();
       LOG.debug("Dora client rename error ({} times). Fall back to UFS.",
           UFS_FALLBACK_COUNTER.getCount(), ex);
@@ -429,41 +408,16 @@ public class DoraCacheFileSystem extends DelegatingFileSystem {
       throws InvalidPathException, IOException, AlluxioException {
     AlluxioURI ufsFullPath = convertAlluxioPathToUFSPath(path);
 
-    try {
-      ExistsPOptions mergedOptions = FileSystemOptionsUtils.existsDefaults(
-          mFsContext.getPathConf(ufsFullPath)).toBuilder().mergeFrom(options).build();
-
-      return mDoraClient.exists(ufsFullPath.toString(), mergedOptions);
-    } catch (RuntimeException ex) {
-      if (!mUfsFallbackEnabled) {
-        throw ex;
-      }
-      UFS_FALLBACK_COUNTER.inc();
-      LOG.debug("Dora client exists error ({} times). Fall back to UFS.",
-          UFS_FALLBACK_COUNTER.getCount(), ex);
-      return mDelegatedFileSystem.exists(ufsFullPath, options);
-    }
+    return mDelegatedFileSystem.exists(ufsFullPath, options);
   }
 
   @Override
   public void setAttribute(AlluxioURI path, SetAttributePOptions options)
       throws FileDoesNotExistException, IOException, AlluxioException {
     AlluxioURI ufsFullPath = convertAlluxioPathToUFSPath(path);
+    LOG.warn("Dora Client does not support create/write. This is only for test.");
 
-    try {
-      SetAttributePOptions mergedOptions = FileSystemOptionsUtils.setAttributeDefaults(
-          mFsContext.getPathConf(ufsFullPath)).toBuilder().mergeFrom(options).build();
-
-      mDoraClient.setAttribute(ufsFullPath.toString(), mergedOptions);
-    } catch (RuntimeException ex) {
-      if (!mUfsFallbackEnabled) {
-        throw ex;
-      }
-      UFS_FALLBACK_COUNTER.inc();
-      LOG.debug("Dora client setAttribute error ({} times). Fall back to UFS.",
-          UFS_FALLBACK_COUNTER.getCount(), ex);
-      mDelegatedFileSystem.setAttribute(ufsFullPath, options);
-    }
+    mDelegatedFileSystem.setAttribute(ufsFullPath, options);
   }
 
   /**

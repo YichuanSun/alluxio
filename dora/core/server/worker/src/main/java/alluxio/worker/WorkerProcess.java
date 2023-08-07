@@ -17,6 +17,7 @@ import alluxio.conf.PropertyKey;
 import alluxio.underfs.UfsManager;
 import alluxio.wire.WorkerNetAddress;
 import alluxio.worker.modules.AlluxioWorkerProcessModule;
+import alluxio.worker.modules.BlockWorkerModule;
 import alluxio.worker.modules.DoraWorkerModule;
 import alluxio.worker.modules.GrpcServerModule;
 import alluxio.worker.modules.NettyServerModule;
@@ -43,31 +44,20 @@ public interface WorkerProcess extends Process {
      */
     public static WorkerProcess create() {
       // read configurations
+      boolean isDoraEnable = Configuration.global()
+          .getBoolean(PropertyKey.DORA_CLIENT_READ_LOCATION_POLICY_ENABLED);
       boolean isNettyDataTransmissionEnable =
           Configuration.global().getBoolean(PropertyKey.USER_NETTY_DATA_TRANSMISSION_ENABLED);
       // add modules that need to be injected
-      ImmutableList<Module> modules = sModules;
-      if (modules == null) {
-        ImmutableList.Builder<Module> builder = ImmutableList.builder();
-        builder.add(new DoraWorkerModule());
-        builder.add(new GrpcServerModule());
-        builder.add(new NettyServerModule(isNettyDataTransmissionEnable));
-        builder.add(new AlluxioWorkerProcessModule());
-        modules = builder.build();
-      }
+      ImmutableList.Builder<Module> modules = ImmutableList.builder();
+      modules.add(isDoraEnable ? new DoraWorkerModule() : new BlockWorkerModule());
+      modules.add(new GrpcServerModule());
+      modules.add(new NettyServerModule(isNettyDataTransmissionEnable));
+      modules.add(new AlluxioWorkerProcessModule());
 
       // inject the modules
-      Injector injector = Guice.createInjector(modules);
+      Injector injector = Guice.createInjector(modules.build());
       return injector.getInstance(WorkerProcess.class);
-    }
-
-    private static ImmutableList<Module> sModules = null;
-
-    /**
-     * @param a new module list to replace the default
-     */
-    public static void withModules(ImmutableList<Module> modules) {
-      sModules = modules;
     }
 
     private Factory() {

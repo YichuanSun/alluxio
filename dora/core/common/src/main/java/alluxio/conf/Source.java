@@ -29,7 +29,6 @@ public class Source implements Comparable<Source> {
   public static final Source PATH_DEFAULT = new Source(Type.PATH_DEFAULT);
   public static final Source RUNTIME = new Source(Type.RUNTIME);
   public static final Source MOUNT_OPTION = new Source(Type.MOUNT_OPTION);
-  public static final Source REFERENCE = new Source(Type.REFERENCE);
 
   /**
    * Source type.
@@ -47,10 +46,6 @@ public class Source implements Comparable<Source> {
      * The default property value as loaded from the masters of the cluster.
      */
     CLUSTER_DEFAULT,
-    /**
-     * The property value is specified by reference property.
-     */
-    REFERENCE,
     /**
      * The property value is specified in site properties file (alluxio-site.properties).
      */

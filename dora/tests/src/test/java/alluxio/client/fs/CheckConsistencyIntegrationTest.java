@@ -13,7 +13,6 @@ package alluxio.client.fs;
 
 import alluxio.AlluxioURI;
 import alluxio.AuthenticatedUserRule;
-import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.client.file.FileSystem;
 import alluxio.conf.Configuration;
 import alluxio.conf.PropertyKey;
@@ -30,7 +29,6 @@ import alluxio.underfs.options.DeleteOptions;
 import com.google.common.collect.Lists;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -43,9 +41,6 @@ import java.util.List;
  * Integration test for
  * {@link FileSystemMaster#checkConsistency(AlluxioURI, CheckConsistencyContext)}.
  */
-@Ignore
-@DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "jiacheng",
-    comment = "check if the command is still relevant")
 public class CheckConsistencyIntegrationTest extends BaseIntegrationTest {
   private static final AlluxioURI DIRECTORY = new AlluxioURI("/dir");
   private static final AlluxioURI FILE = new AlluxioURI("/dir/file");

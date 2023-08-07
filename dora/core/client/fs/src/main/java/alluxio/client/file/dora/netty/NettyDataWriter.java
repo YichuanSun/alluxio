@@ -144,6 +144,8 @@ public class NettyDataWriter implements DataWriter {
         return Protocol.RequestType.ALLUXIO_BLOCK;
       case UFS_FILE:
         return Protocol.RequestType.UFS_FILE;
+      case UFS_FALLBACK_BLOCK:
+        throw new UnsupportedOperationException("Unsupported request type UFS_FALLBACK_BLOCK. ");
       default:
         throw new UnsupportedOperationException("Request type needs to be specified. ");
     }
@@ -258,10 +260,7 @@ public class NettyDataWriter implements DataWriter {
       mChannel.writeAndFlush(new RPCProtoMessage(new ProtoMessage(writeRequest), dataBuffer))
           .addListener(new WriteListener(offset + len)).sync();
     } catch (InterruptedException e) {
-      if (mPacketWriteException != null) {
-        Throwables.propagateIfPossible(mPacketWriteException, IOException.class);
-        throw AlluxioStatusException.fromCheckedException(mPacketWriteException);
-      }
+      // ignore
     }
   }
 
@@ -418,14 +417,6 @@ public class NettyDataWriter implements DataWriter {
     } else {
       mPacketWriteException.addSuppressed(e);
     }
-  }
-
-  /**
-   * Get the exception object that created during packet writing.
-   * @return the exception object
-   */
-  public Throwable getPacketWriteException() {
-    return mPacketWriteException;
   }
 
   /**

@@ -13,7 +13,6 @@ package alluxio.client.cli.fs.command;
 
 import alluxio.AlluxioURI;
 import alluxio.Constants;
-import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.client.cli.fs.AbstractFileSystemShellTest;
 import alluxio.client.file.FileSystemTestUtils;
 import alluxio.client.file.URIStatus;
@@ -21,7 +20,6 @@ import alluxio.grpc.TtlAction;
 import alluxio.grpc.WritePType;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -30,9 +28,6 @@ import java.util.Map;
 /**
  * Tests for setTtl command.
  */
-@DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "hua",
-    comment = "fix TTL command tests")
-@Ignore
 public final class SetTtlCommandIntegrationTest extends AbstractFileSystemShellTest {
   @Test
   public void setTtl() throws Exception {

@@ -1,8 +1,12 @@
 ---
 layout: global
 title: List of Metrics
+group: Reference
+priority: 1
 ---
 
+* Table of Contents
+{:toc}
 
 There are two types of metrics in Alluxio, cluster-wide aggregated metrics, and per-process detailed metrics.
 
@@ -41,11 +45,11 @@ The values of bytes throughput metrics equal to bytes metrics counter value divi
 
 <table class="table table-striped">
 <tr><th>Name</th><th>Type</th><th>Description</th></tr>
-{% for item in site.data.generated.cluster-metrics %}
+{% for item in site.data.table.cluster-metrics %}
   <tr>
     <td><a class="anchor" name="{{ item.metricName }}"></a> {{ item.metricName }}</td>
     <td>{{ item.metricType }}</td>
-    <td>{{ site.data.generated.en.cluster-metrics[item.metricName] }}</td>
+    <td>{{ site.data.table.en.cluster-metrics[item.metricName] }}</td>
   </tr>
 {% endfor %}
 </table>
@@ -56,11 +60,11 @@ Metrics shared by the all Alluxio server and client processes.
 
 <table class="table table-striped">
 <tr><th>Name</th><th>Type</th><th>Description</th></tr>
-{% for item in site.data.generated.process-metrics %}
+{% for item in site.data.table.process-metrics %}
   <tr>
     <td><a class="anchor" name="{{ item.metricName }}"></a> {{ item.metricName }}</td>
     <td>{{ item.metricType }}</td>
-    <td>{{ site.data.generated.en.process-metrics[item.metricName] }}</td>
+    <td>{{ site.data.table.en.process-metrics[item.metricName] }}</td>
   </tr>
 {% endfor %}
 </table>
@@ -71,11 +75,11 @@ Metrics shared by the Alluxio server processes.
 
 <table class="table table-striped">
 <tr><th>Name</th><th>Type</th><th>Description</th></tr>
-{% for item in site.data.generated.server-metrics %}
+{% for item in site.data.table.server-metrics %}
   <tr>
     <td><a class="anchor" name="{{ item.metricName }}"></a> {{ item.metricName }}</td>
     <td>{{ item.metricType }}</td>
-    <td>{{ site.data.generated.en.server-metrics[item.metricName] }}</td>
+    <td>{{ site.data.table.en.server-metrics[item.metricName] }}</td>
   </tr>
 {% endfor %}
 </table>
@@ -86,11 +90,11 @@ Default master metrics:
 
 <table class="table table-striped">
 <tr><th>Name</th><th>Type</th><th>Description</th></tr>
-{% for item in site.data.generated.master-metrics %}
+{% for item in site.data.table.master-metrics %}
   <tr>
     <td><a class="anchor" name="{{ item.metricName }}"></a> {{ item.metricName }}</td>
     <td>{{ item.metricType }}</td>
-    <td>{{ site.data.generated.en.master-metrics[item.metricName] }}</td>
+    <td>{{ site.data.table.en.master-metrics[item.metricName] }}</td>
   </tr>
 {% endfor %}
 </table>
@@ -113,11 +117,11 @@ Default worker metrics:
 
 <table class="table table-striped">
 <tr><th>Name</th><th>Type</th><th>Description</th></tr>
-{% for item in site.data.generated.worker-metrics %}
+{% for item in site.data.table.worker-metrics %}
   <tr>
     <td><a class="anchor" name="{{ item.metricName }}"></a> {{ item.metricName }}</td>
     <td>{{ item.metricType }}</td>
-    <td>{{ site.data.generated.en.worker-metrics[item.metricName] }}</td>
+    <td>{{ site.data.table.en.worker-metrics[item.metricName] }}</td>
   </tr>
 {% endfor %}
 </table>
@@ -136,11 +140,11 @@ If `alluxio.user.app.id` is configured, multiple clients can be combined into a 
 
 <table class="table table-striped">
 <tr><th>Name</th><th>Type</th><th>Description</th></tr>
-{% for item in site.data.generated.client-metrics %}
+{% for item in site.data.table.client-metrics %}
   <tr>
     <td><a class="anchor" name="{{ item.metricName }}"></a> {{ item.metricName }}</td>
     <td>{{ item.metricType }}</td>
-    <td>{{ site.data.generated.en.client-metrics[item.metricName] }}</td>
+    <td>{{ site.data.table.en.client-metrics[item.metricName] }}</td>
   </tr>
 {% endfor %}
 </table>
@@ -156,11 +160,11 @@ Fuse metrics includes:
 
 <table class="table table-striped">
 <tr><th>Name</th><th>Type</th><th>Description</th></tr>
-{% for item in site.data.generated.fuse-metrics %}
+{% for item in site.data.table.fuse-metrics %}
   <tr>
     <td><a class="anchor" name="{{ item.metricName }}"></a> {{ item.metricName }}</td>
     <td>{{ item.metricType }}</td>
-    <td>{{ site.data.generated.en.fuse-metrics[item.metricName] }}</td>
+    <td>{{ site.data.table.en.fuse-metrics[item.metricName] }}</td>
   </tr>
 {% endfor %}
 </table>

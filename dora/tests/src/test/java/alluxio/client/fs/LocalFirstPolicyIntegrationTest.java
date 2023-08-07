@@ -17,7 +17,6 @@ import alluxio.AlluxioTestDirectory;
 import alluxio.ConfigurationRule;
 import alluxio.ConfigurationTestUtils;
 import alluxio.Process;
-import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.client.file.FileSystem;
 import alluxio.client.file.FileSystemTestUtils;
 import alluxio.conf.Configuration;
@@ -34,7 +33,6 @@ import alluxio.worker.block.BlockWorker;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.powermock.reflect.Whitebox;
@@ -46,9 +44,6 @@ import java.util.concurrent.Executors;
 /**
  * Integration tests for functionality relating to tiered identity.
  */
-@DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "jiaming",
-    comment = "this policy is still relevant but racking is no longer supported")
-@Ignore
 public class LocalFirstPolicyIntegrationTest extends BaseIntegrationTest {
   private ExecutorService mExecutor;
 

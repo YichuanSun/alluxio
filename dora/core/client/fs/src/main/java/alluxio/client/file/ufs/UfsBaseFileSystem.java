@@ -17,7 +17,6 @@ import alluxio.client.file.FileInStream;
 import alluxio.client.file.FileOutStream;
 import alluxio.client.file.FileSystem;
 import alluxio.client.file.FileSystemContext;
-import alluxio.client.file.FileSystemMasterClient;
 import alluxio.client.file.ListStatusPartialResult;
 import alluxio.client.file.URIStatus;
 import alluxio.client.file.options.UfsFileSystemOptions;
@@ -233,13 +232,12 @@ public class UfsBaseFileSystem implements FileSystem {
   }
 
   @Override
-  public URIStatus getStatus(AlluxioURI path) throws FileDoesNotExistException {
+  public URIStatus getStatus(AlluxioURI path) {
     return getStatus(path, GetStatusPOptions.getDefaultInstance());
   }
 
   @Override
-  public URIStatus getStatus(AlluxioURI path, final GetStatusPOptions options)
-      throws FileDoesNotExistException {
+  public URIStatus getStatus(AlluxioURI path, final GetStatusPOptions options) {
     return callWithReturn(() -> {
       UfsStatus ufsStatus = mUfs.get().getStatus(path.toString(), GetStatusOptions.defaults()
                             .setIncludeRealContentHash(options.getIncludeRealContentHash()));
@@ -379,8 +377,7 @@ public class UfsBaseFileSystem implements FileSystem {
   }
 
   @Override
-  public FileInStream openFile(AlluxioURI path, OpenFilePOptions options)
-      throws FileDoesNotExistException {
+  public FileInStream openFile(AlluxioURI path, OpenFilePOptions options) {
     return openFile(getStatus(path), options);
   }
 
@@ -405,8 +402,7 @@ public class UfsBaseFileSystem implements FileSystem {
   }
 
   @Override
-  public PositionReader openPositionRead(AlluxioURI path, OpenFilePOptions options)
-      throws FileDoesNotExistException {
+  public PositionReader openPositionRead(AlluxioURI path, OpenFilePOptions options) {
     return openPositionRead(getStatus(path), options);
   }
 
@@ -505,27 +501,18 @@ public class UfsBaseFileSystem implements FileSystem {
 
   @Override
   public Optional<String> submitJob(JobRequest jobRequest) {
-    try (CloseableResource<FileSystemMasterClient> client =
-        mFsContext.acquireMasterClientResource()) {
-      return client.get().submitJob(jobRequest);
-    }
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public boolean stopJob(JobDescription jobDescription) {
-    try (CloseableResource<FileSystemMasterClient> client =
-        mFsContext.acquireMasterClientResource()) {
-      return client.get().stopJob(jobDescription);
-    }
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public String getJobProgress(JobDescription jobDescription,
       JobProgressReportFormat format, boolean verbose) {
-    try (CloseableResource<FileSystemMasterClient> client =
-        mFsContext.acquireMasterClientResource()) {
-      return client.get().getJobProgress(jobDescription, format, verbose);
-    }
+    throw new UnsupportedOperationException();
   }
 
   /**

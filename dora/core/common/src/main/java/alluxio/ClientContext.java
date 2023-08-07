@@ -19,6 +19,8 @@ import alluxio.conf.Configuration;
 import alluxio.conf.PropertyKey;
 import alluxio.conf.path.PathConfiguration;
 import alluxio.exception.status.AlluxioStatusException;
+import alluxio.grpc.GetConfigurationPResponse;
+import alluxio.grpc.Scope;
 import alluxio.security.user.UserState;
 
 import java.net.InetSocketAddress;
@@ -90,7 +92,7 @@ public class ClientContext {
     mUriValidationEnabled = ctx.getUriValidationEnabled();
   }
 
-  protected ClientContext(Subject subject, AlluxioConfiguration alluxioConf) {
+  private ClientContext(Subject subject, AlluxioConfiguration alluxioConf) {
     requireNonNull(subject, "subject is null");
     mClusterConf = requireNonNull(alluxioConf, "alluxioConf is null");
     mClusterConfHash = alluxioConf.hash();
@@ -114,8 +116,21 @@ public class ClientContext {
    */
   public synchronized void loadConf(InetSocketAddress address, boolean loadClusterConf,
       boolean loadPathConf) throws AlluxioStatusException {
-    // TODO(yyong) so far remove it, will check if it is required to change for improvement.
-    return;
+    AlluxioConfiguration conf = mClusterConf;
+    if (!loadClusterConf && !loadPathConf) {
+      return;
+    }
+    GetConfigurationPResponse response = Configuration.loadConfiguration(address,
+        conf, !loadClusterConf, !loadPathConf);
+    if (loadClusterConf) {
+      mClusterConf = Configuration.getClusterConf(response, conf, Scope.CLIENT);
+      mClusterConfHash = response.getClusterConfigHash();
+    }
+    if (loadPathConf) {
+      mPathConf = Configuration.getPathConf(response, conf);
+      mPathConfHash = response.getPathConfigHash();
+      mIsPathConfLoaded = true;
+    }
   }
 
   /**
@@ -156,35 +171,11 @@ public class ClientContext {
     return mClusterConf;
   }
 
-  protected void setClusterConf(AlluxioConfiguration alluxioConfiguration) {
-    mClusterConf = alluxioConfiguration;
-  }
-
-  protected void setClusterConfHash(String clusterConfHash) {
-    mClusterConfHash = clusterConfHash;
-  }
-
   /**
    * @return the path level configuration backing this context
    */
   public PathConfiguration getPathConf() {
     return mPathConf;
-  }
-
-  protected void setPathConf(PathConfiguration pathConfiguration) {
-    mPathConf = pathConfiguration;
-  }
-
-  protected void setPathConfHash(String pathConfHash) {
-    mPathConfHash = pathConfHash;
-  }
-
-  protected void setIsPathConfLoaded(boolean isPathConfLoaded) {
-    mIsPathConfLoaded = isPathConfLoaded;
-  }
-
-  protected boolean getIsPathConfLoaded() {
-    return mIsPathConfLoaded;
   }
 
   /**

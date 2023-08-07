@@ -1,7 +1,12 @@
 ---
 layout: global
-title: Presto SDK with Local Cache
+title: Presto SDK with local cache
+group: Presto SDK
+priority: 1
 ---
+
+* Table of Contents
+  {:toc}
 
 Presto provides an SDK way to combined with Alluxio.
 With the SDK, hot data that need to be scanned frequently
@@ -19,14 +24,14 @@ can be cached locally on Presto Workers that execute the TableScan operator.
 Presto gets the database and table metadata information (including file system locations) from the Hive Metastore, via Presto's Hive Connector.
 Here is an example Presto configuration file `${PRESTO_HOME}/etc/hive.properties`, for a catalog using the Hive connector,
 where the metastore is located on `localhost`.
-```properties
+```shell
 connector.name=hive-hadoop2
 hive.metastore.uri=thrift://localhost:9083
 ```
 
 ### Enable local caching for Presto
 To enable local caching, add the following configurations in `${PRESTO_HOME}/etc/hive.properties`:
-```properties
+```shell
 hive.node-selection-strategy=SOFT_AFFINITY
 cache.enabled=true
 cache.type=ALLUXIO
@@ -49,7 +54,7 @@ After completing the basic configuration, Presto should be able to access data i
 
 ## Example
 ### Create a Hive
-Create a Hive table by hive client specifying its `LOCATION` to Alluxio.
+Create a Hive table by hive client specifying its LOCATION to Alluxio.
 ```sql
 hive> CREATE TABlE employee_parquet_alluxio (name string, salary int)
 PARTITIONED BY (doj string)
@@ -86,92 +91,92 @@ In order to expose the metrics of local caching, follow the steps below:
 The following metrics would be useful for tracking local caching:
 <table class="table table-striped">
     <tr>
-        <th>Metric Name</th>
-        <th>Type</th>
-        <th>Description</th>
+        <td>Metric Name</td>
+        <td>Type</td>
+        <td>Description</td>
     </tr>
     <tr>
-        <td markdown="span">`Client.CacheBytesReadCache`</td>
+        <td>Client.CacheBytesReadCache</td>
         <td>METER</td>
         <td>Bytes read from client.</td>
     </tr>
     <tr>
-        <td markdown="span">`Client.CachePutErrors`</td>
+        <td>Client.CachePutErrors</td>
         <td>COUNTER</td>
         <td>Number of failures when putting cached data in the client cache.</td>
     </tr>
     <tr>
-        <td markdown="span">`Client.CachePutInsufficientSpaceErrors`</td>
+        <td>Client.CachePutInsufficientSpaceErrors</td>
         <td>COUNTER</td>
         <td>Number of failures when putting cached data in the client cache due to insufficient space made after eviction.</td>
     </tr>
     <tr>
-        <td markdown="span">`Client.CachePutNotReadyErrors`</td>
+        <td>Client.CachePutNotReadyErrors</td>
         <td>COUNTER</td>
         <td>Number of failures when cache is not ready to add pages.</td>
     </tr>
     <tr>
-        <td markdown="span">`Client.CachePutBenignRacingErrors`</td>
+        <td>Client.CachePutBenignRacingErrors</td>
         <td>COUNTER</td>
         <td>Number of failures when adding pages due to racing eviction. This error is benign.</td>
     </tr>
     <tr>
-        <td markdown="span">`Client.CachePutStoreWriteErrors`</td>
+        <td>Client.CachePutStoreWriteErrors</td>
         <td>COUNTER</td>
         <td>Number of failures when putting cached data in the client cache due to failed writes to page store.</td>
     </tr>
     <tr>
-        <td markdown="span">`Client.CachePutEvictionErrors`</td>
+        <td>Client.CachePutEvictionErrors</td>
         <td>COUNTER</td>
         <td>Number of failures when putting cached data in the client cache due to failed eviction.</td>
     </tr>
     <tr>
-        <td markdown="span">`Client.CachePutStoreDeleteErrors`</td>
+        <td>Client.CachePutStoreDeleteErrors</td>
         <td>COUNTER</td>
         <td>Number of failures when putting cached data in the client cache due to failed deletes in page store.</td>
     </tr>
     <tr>
-        <td markdown="span">`Client.CacheGetErrors`</td>
+        <td>Client.CacheGetErrors</td>
         <td>COUNTER</td>
         <td>Number of failures when getting cached data in the client cache.</td>
     </tr>
     <tr>
-        <td markdown="span">`Client.CacheGetNotReadyErrors`</td>
+        <td>Client.CacheGetNotReadyErrors</td>
         <td>COUNTER</td>
         <td>Number of failures when cache is not ready to get pages.</td>
     </tr>
     <tr>
-        <td markdown="span">`Client.CacheGetStoreReadErrors`</td>
+        <td>Client.CacheGetStoreReadErrors</td>
         <td>COUNTER</td>
         <td>Number of failures when getting cached data in the client cache due to failed read from page stores.</td>
     </tr>
     <tr>
-        <td markdown="span">`Client.CacheDeleteNonExistingPageErrors`</td>
+        <td>Client.CacheDeleteNonExistingPageErrors</td>
         <td>COUNTER</td>
         <td>Number of failures when deleting pages due to absence.</td>
     </tr>
     <tr>
-        <td markdown="span">`Client.CacheDeleteNotReadyErrors`</td>
+        <td>Client.CacheDeleteNotReadyErrors</td>
         <td>COUNTER</td>
         <td>Number of failures when cache is not ready to delete pages.</td>
     </tr>
     <tr>
-        <td markdown="span">`Client.CacheDeleteFromStoreErrors`</td>
+        <td>Client.CacheDeleteFromStoreErrors</td>
         <td>COUNTER</td>
         <td>Number of failures when deleting pages from page stores.</td>
     </tr>
     <tr>
-        <td markdown="span">`Client.CacheHitRate`</td>
+        <td>Client.CacheHitRate</td>
         <td>GAUGE</td>
         <td>Cache hit rate: (# bytes read from cache) / (# bytes requested).</td>
     </tr>
     <tr>
-        <td markdown="span">`Client.CachePagesEvicted`</td>
+        <td>Client.CachePagesEvicted</td>
         <td>METER</td>
         <td>Total number of pages evicted from the client cache.</td>
     </tr>
     <tr>
-        <td markdown="span">`Client.CacheBytesEvicted`</td>
+        <td>Client.CacheBytesEvicted</td>
         <td>METER</td>
         <td>Total number of bytes evicted from the client cache.</td>
     </tr>

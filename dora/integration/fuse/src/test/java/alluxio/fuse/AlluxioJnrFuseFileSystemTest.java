@@ -31,7 +31,6 @@ import static org.mockito.Mockito.when;
 import alluxio.AlluxioURI;
 import alluxio.ConfigurationRule;
 import alluxio.Constants;
-import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.client.block.BlockMasterClient;
 import alluxio.client.file.FileInStream;
 import alluxio.client.file.FileOutStream;
@@ -58,7 +57,6 @@ import jnr.ffi.Runtime;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -80,9 +78,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({BlockMasterClient.Factory.class})
-@Ignore
-@DoraTestTodoItem(action = DoraTestTodoItem.Action.REMOVE, owner = "LuQQiu",
-    comment = "remove JNR support in 30x")
 public class AlluxioJnrFuseFileSystemTest {
 
   private static final String TEST_ROOT_PATH = "/t/root";

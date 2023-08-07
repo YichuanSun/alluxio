@@ -450,8 +450,7 @@ public class S3ObjectTask extends S3BaseTask {
 
         try (S3AuditContext auditContext = mHandler.createAuditContext(
             mOPType.name(), user, mHandler.getBucket(), mHandler.getObject())) {
-          S3RestUtils.checkPathIsAlluxioDirectory(userFs, bucketPath, auditContext,
-              mHandler.BUCKET_PATH_CACHE);
+
           if (objectPath.endsWith(AlluxioURI.SEPARATOR)) {
             createDirectory(objectPath, userFs, auditContext);
           }

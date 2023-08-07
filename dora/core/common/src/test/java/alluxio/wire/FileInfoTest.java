@@ -186,8 +186,6 @@ public class FileInfoTest {
     result.setDefaultAcl((DefaultAccessControlList) AccessControlList
         .fromStringEntries(userName, groupName, defaultStringEntries));
     result.setXAttr(xttrs);
-    result.setContentHash("content_hash");
-    result.setUfsType("s3");
     return result;
   }
 }

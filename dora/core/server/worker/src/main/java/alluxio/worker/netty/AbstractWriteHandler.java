@@ -14,6 +14,7 @@ package alluxio.worker.netty;
 import alluxio.conf.Configuration;
 import alluxio.conf.PropertyKey;
 import alluxio.exception.status.AlluxioStatusException;
+import alluxio.exception.status.InternalException;
 import alluxio.exception.status.InvalidArgumentException;
 import alluxio.network.protocol.RPCMessage;
 import alluxio.network.protocol.RPCProtoMessage;
@@ -192,6 +193,7 @@ abstract class AbstractWriteHandler<T extends WriteRequestContext<?>>
 
   @Override
   public void channelUnregistered(ChannelHandlerContext ctx) {
+    pushAbortPacket(ctx.channel(), new Error(new InternalException("channel unregistered"), false));
     ctx.fireChannelUnregistered();
   }
 

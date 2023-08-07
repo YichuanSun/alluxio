@@ -18,10 +18,10 @@ import alluxio.scheduler.job.Job;
 import alluxio.scheduler.job.JobState;
 import alluxio.scheduler.job.Task;
 
+import org.eclipse.jetty.util.BlockingArrayQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,8 +39,7 @@ public abstract class AbstractJob<T extends Task<?>> implements Job<T> {
   protected OptionalLong mEndTime = OptionalLong.empty();
   protected final long mStartTime;
   protected final Optional<String> mUser;
-  // not making it thread safe as currently scheduler has been single-threaded
-  protected final LinkedHashSet<T> mRetryTaskList = new LinkedHashSet<>();
+  protected final BlockingArrayQueue<Task<T>> mTaskList = new BlockingArrayQueue<>();
   protected WorkerAssignPolicy mWorkerAssignPolicy;
 
   /**
@@ -127,18 +126,12 @@ public abstract class AbstractJob<T extends Task<?>> implements Job<T> {
   public void setJobState(JobState state, boolean journalUpdate) {
     LOG.debug("Change JobState to {} for job {}, journalUpdate:{}", state, this, journalUpdate);
     mState = state;
-    if (!isRunning()) {
-      mEndTime = OptionalLong.of(System.currentTimeMillis());
-    }
     if (journalUpdate) {
       Scheduler.getInstance().getJobMetaStore().updateJob(this);
     }
-  }
-
-  @Override
-  public void onTaskSubmitFailure(Task<?> task) {
-    mRetryTaskList.add((T) task);
-    LOG.debug("OnTaskSubmitFailure, retry task size:{}", mRetryTaskList.size());
+    if (!isRunning()) {
+      mEndTime = OptionalLong.of(System.currentTimeMillis());
+    }
   }
 
   @Override

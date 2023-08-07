@@ -71,9 +71,4 @@ public abstract class BlockWriter extends BlockClient {
    * Commit the file.
    */
   public abstract void commitFile();
-
-  /**
-   * Abort writing.
-   */
-  public abstract void abort();
 }

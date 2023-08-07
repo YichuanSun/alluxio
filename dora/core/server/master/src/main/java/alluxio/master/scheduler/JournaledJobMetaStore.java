@@ -59,13 +59,9 @@ public class JournaledJobMetaStore implements JobMetaStore, Journaled {
       return false;
     }
     else {
-      try {
-        Job<?> job = JobFactoryProducer.create(entry, mFileSystemMaster).create();
-        mExistingJobs.remove(job);
-        mExistingJobs.add(job);
-      } catch (RuntimeException e) {
-        LOG.error("Failed to create job from journal entry: {}", entry, e);
-      }
+      Job<?> job = JobFactoryProducer.create(entry, mFileSystemMaster).create();
+      mExistingJobs.remove(job);
+      mExistingJobs.add(job);
     }
     return true;
   }

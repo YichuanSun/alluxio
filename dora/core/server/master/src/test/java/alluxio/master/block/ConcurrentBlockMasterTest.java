@@ -47,7 +47,6 @@ import com.google.common.collect.ImmutableMap;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -65,7 +64,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-@Ignore("BlockMaster is not used and will be removed")
 public class ConcurrentBlockMasterTest {
   private static final WorkerNetAddress NET_ADDRESS_1 = new WorkerNetAddress().setHost("localhost")
       .setRpcPort(80).setDataPort(81).setWebPort(82);
@@ -734,6 +732,8 @@ public class ConcurrentBlockMasterTest {
       long worker1 = registerEmptyWorker(NET_ADDRESS_1);
       // Prepare block on the worker
       mBlockMaster.commitBlock(worker1, BLOCK1_LENGTH, "MEM", "MEM", BLOCK1_ID, BLOCK1_LENGTH);
+      // Prepare block 2 so it is recognized at worker register
+      mBlockMaster.commitBlockInUFS(BLOCK2_ID, BLOCK2_LENGTH);
       CountDownLatch w1Latch = new CountDownLatch(1);
       mBlockMaster.setLatch(w1Latch);
 
@@ -818,6 +818,8 @@ public class ConcurrentBlockMasterTest {
     for (boolean deleteMetadata : ImmutableList.of(true, false)) {
       // Prepare worker
       long worker1 = registerEmptyWorker(NET_ADDRESS_1);
+      // Prepare block in alluxio
+      mBlockMaster.commitBlockInUFS(BLOCK1_ID, BLOCK1_LENGTH);
       CountDownLatch w1Latch = new CountDownLatch(1);
       mBlockMaster.setLatch(w1Latch);
 

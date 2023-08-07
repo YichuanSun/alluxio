@@ -15,15 +15,12 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"github.com/palantir/stacktrace"
 	"log"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
-
-	"github.com/palantir/stacktrace"
-
-	"alluxio.org/common/repo"
 )
 
 type UfsVersionDetails struct {
@@ -72,7 +69,7 @@ func UfsVersionCheckF(args []string) error {
 
 		parsedVersions, ok := parsedFiles[u.VersionEnumFilePath]
 		if !ok {
-			parsed, err := parseEnumFile(filepath.Join(repo.FindRepoRoot(), u.VersionEnumFilePath))
+			parsed, err := parseEnumFile(filepath.Join(findRepoRoot(), u.VersionEnumFilePath))
 			if err != nil {
 				return stacktrace.Propagate(err, "error parsing enum file %v", u.VersionEnumFilePath)
 			}

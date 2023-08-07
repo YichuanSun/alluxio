@@ -12,7 +12,6 @@
 package alluxio.client.fs.io;
 
 import alluxio.AlluxioURI;
-import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.client.WriteType;
 import alluxio.client.file.FileOutStream;
 import alluxio.client.file.URIStatus;
@@ -35,15 +34,11 @@ import alluxio.util.io.PathUtils;
 
 import org.junit.Assert;
 import org.junit.Assume;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
  * Integration tests for {@link FileOutStream} of under storage type being async persist.
  */
-@Ignore
-@DoraTestTodoItem(action = DoraTestTodoItem.Action.REMOVE, owner = "jianjian",
-    comment = "job service is gone but check if any test cases can be recycled")
 public final class FileOutStreamAsyncWriteJobIntegrationTest
     extends AbstractFileOutStreamIntegrationTest {
   private static final int LEN = 1024;

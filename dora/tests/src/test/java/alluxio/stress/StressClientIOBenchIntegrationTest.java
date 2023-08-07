@@ -15,14 +15,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.stress.cli.client.StressClientIOBench;
 import alluxio.stress.client.ClientIOSummary;
 import alluxio.stress.client.ClientIOTaskResult;
 import alluxio.util.JsonSerializable;
 
 import com.google.common.collect.ImmutableList;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -33,9 +31,6 @@ import java.util.List;
 /**
  * Tests {@link StressClientIOBench}.
  */
-@Ignore
-@DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "bowen",
-    comment = "need to fix the tests")
 public class StressClientIOBenchIntegrationTest extends AbstractStressBenchIntegrationTest {
   @Test
   public void readIO() throws Exception {

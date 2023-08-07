@@ -52,15 +52,6 @@ public class DocGenerator {
    * @param args arguments for command line
    */
   public static void main(String[] args) throws IOException {
-    generate(args);
-  }
-
-  /**
-   *
-   * @param args
-   * @throws IOException
-   */
-  public static void generate(String[] args) throws IOException {
     if (args.length != 0) {
       CommandLineParser parser = new DefaultParser();
       CommandLine cmd;

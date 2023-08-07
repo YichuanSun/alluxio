@@ -12,7 +12,6 @@
 package alluxio.client.cli.fsadmin.pathconf;
 
 import alluxio.AlluxioURI;
-import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.cli.fs.FileSystemShell;
 import alluxio.cli.fsadmin.FileSystemAdminShell;
 import alluxio.cli.fsadmin.pathconf.AddCommand;
@@ -30,7 +29,6 @@ import alluxio.grpc.CreateFilePOptions;
 import alluxio.master.file.meta.PersistenceState;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -123,9 +121,6 @@ public class AddCommandIntegrationTest extends AbstractShellIntegrationTest {
   }
 
   @Test
-  @Ignore
-  @DoraTestTodoItem(action = DoraTestTodoItem.Action.REMOVE, owner = "jiacheng",
-      comment = "path conf does not exist in dora")
   public void immediatelyEffectiveForShellCommands() throws Exception {
     // Tests that after adding some path configuration, it's immediately effective for command
     // line calls afterwards.

@@ -125,7 +125,6 @@ public class PageInfo {
         .add("PageId", mPageId)
         .add("PageSize", mPageSize)
         .add("Scope", mCacheScope)
-        .add("CreateTimeMs", mCreatedTimestamp)
         .toString();
   }
 }

@@ -15,14 +15,17 @@ import static com.google.common.hash.Hashing.md5;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import alluxio.AlluxioURI;
+import alluxio.CloseableSupplier;
+import alluxio.PositionReader;
 import alluxio.client.file.CacheContext;
-import alluxio.client.file.FileInStream;
+import alluxio.client.file.PositionReadFileInStream;
 import alluxio.client.file.URIStatus;
 import alluxio.client.file.cache.CacheManager;
-import alluxio.client.file.cache.LocalCacheFileInStream;
+import alluxio.client.file.cache.LocalCachePositionReader;
 import alluxio.client.file.cache.filter.CacheFilter;
 import alluxio.conf.AlluxioConfiguration;
-import alluxio.exception.AlluxioException;
+import alluxio.conf.PropertyKey;
+import alluxio.exception.runtime.AlluxioRuntimeException;
 import alluxio.metrics.MetricsConfig;
 import alluxio.metrics.MetricsSystem;
 import alluxio.wire.FileInfo;
@@ -41,7 +44,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Properties;
 
 /**
@@ -55,7 +57,6 @@ public class LocalCacheFileSystem extends org.apache.hadoop.fs.FileSystem {
   /** The external Hadoop filesystem to query on cache miss. */
   private final org.apache.hadoop.fs.FileSystem mExternalFileSystem;
   private final HadoopFileOpener mHadoopFileOpener;
-  private final LocalCacheFileInStream.FileInStreamOpener mAlluxioFileOpener;
   private CacheManager mCacheManager;
   private CacheFilter mCacheFilter;
   private org.apache.hadoop.conf.Configuration mHadoopConf;
@@ -76,7 +77,6 @@ public class LocalCacheFileSystem extends org.apache.hadoop.fs.FileSystem {
       HadoopFileOpener fileOpener) {
     mExternalFileSystem = Preconditions.checkNotNull(fileSystem, "filesystem");
     mHadoopFileOpener = Preconditions.checkNotNull(fileOpener, "fileOpener");
-    mAlluxioFileOpener = status -> new AlluxioHdfsInputStream(mHadoopFileOpener.open(status));
   }
 
   @Override
@@ -95,7 +95,6 @@ public class LocalCacheFileSystem extends org.apache.hadoop.fs.FileSystem {
     MetricsSystem.startSinksFromConfig(new MetricsConfig(metricsProperties));
     mCacheManager = CacheManager.Factory.get(mAlluxioConf);
     mCacheFilter = CacheFilter.create(mAlluxioConf);
-    LocalCacheFileInStream.registerMetrics();
   }
 
   @Override
@@ -140,46 +139,31 @@ public class LocalCacheFileSystem extends org.apache.hadoop.fs.FileSystem {
   }
 
   /**
-   * A wrapper method to default not enforce an open call.
+   * Attempts to open the specified file for reading.
    *
    * @param status the status of the file to open
    * @param bufferSize stream buffer size in bytes, currently unused
    * @return an {@link FSDataInputStream} at the indicated path of a file
    */
   public FSDataInputStream open(URIStatus status, int bufferSize) throws IOException {
-    return open(status, bufferSize, false);
-  }
-
-  /**
-   * Attempts to open the specified file for reading.
-   *
-   * @param status the status of the file to open
-   * @param bufferSize stream buffer size in bytes, currently unused
-   * @param enforceOpen flag to enforce calling open to external storage
-   * @return an {@link FSDataInputStream} at the indicated path of a file
-   */
-  public FSDataInputStream open(URIStatus status, int bufferSize, boolean enforceOpen)
-          throws IOException {
     if (mCacheManager == null || !mCacheFilter.needsCache(status)) {
       return mExternalFileSystem.open(HadoopUtils.toPath(new AlluxioURI(status.getPath())),
           bufferSize);
     }
-    Optional<FileInStream> externalFileInStream;
-    if (enforceOpen) {
+    CloseableSupplier<PositionReader> fallbackHadoopReader = new CloseableSupplier<>(() -> {
       try {
-        // making the open call right now, instead of later when called back
-        externalFileInStream = Optional.of(mAlluxioFileOpener.open(status));
-      } catch (AlluxioException e) {
-        throw new IOException(e);
+        return new AlluxioHdfsPositionReader(mHadoopFileOpener.open(status),
+            status.getLength());
+      } catch (IOException e) {
+        throw AlluxioRuntimeException.from(e);
       }
-    } else {
-      externalFileInStream = Optional.empty();
-    }
-
+    });
+    LocalCachePositionReader localCachePositionReader = LocalCachePositionReader
+        .create(mAlluxioConf, mCacheManager, fallbackHadoopReader, status,
+            mAlluxioConf.getBytes(PropertyKey.USER_CLIENT_CACHE_PAGE_SIZE),
+            status.getCacheContext());
     return new FSDataInputStream(new HdfsFileInputStream(
-        new LocalCacheFileInStream(status, mAlluxioFileOpener, mCacheManager, mAlluxioConf,
-            externalFileInStream),
-        statistics));
+        new PositionReadFileInStream(localCachePositionReader, status.getLength()), statistics));
   }
 
   @Override

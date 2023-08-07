@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
@@ -85,13 +86,9 @@ public class FuseEndToEndTest {
     LibFuse.loadLibrary(AlluxioFuseUtils.getLibfuseVersion(Configuration.global()));
     UfsFileSystemOptions ufsOptions =  new UfsFileSystemOptions(ufs);
     FileSystem fileSystem = new UfsBaseFileSystem(context, ufsOptions);
-    final FileSystemOptions fileSystemOptions =
-        FileSystemOptions.Builder
-            .fromConf(context.getClusterConf())
-            .setUfsFileSystemOptions(ufsOptions)
-            .build();
     AlluxioJniFuseFileSystem fuseFileSystem = new AlluxioJniFuseFileSystem(context, fileSystem,
-        FuseOptions.create(Configuration.global(), fileSystemOptions, false));
+        FuseOptions.create(Configuration.global(), FileSystemOptions.create(
+            context.getClusterConf(), Optional.of(ufsOptions)), false));
     fuseFileSystem.mount(false, false, new HashSet<>());
     if (!waitForFuseMounted()) {
       umountFromShellIfMounted();

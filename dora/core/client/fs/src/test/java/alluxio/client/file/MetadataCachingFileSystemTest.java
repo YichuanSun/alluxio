@@ -15,6 +15,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import alluxio.AlluxioURI;
 import alluxio.ClientContext;
 import alluxio.annotation.dora.DoraTestTodoItem;
@@ -162,8 +163,8 @@ public class MetadataCachingFileSystemTest {
   @Ignore
   @Test
   @DoraTestTodoItem(owner = "hua", action = DoraTestTodoItem.Action.FIX,
-        comment = "UfsBaseFileSystem needs to support getBlockLocations for the application."
-            + "The concept of block here is HDFS block, instead of the deprecated Alluxio block.")
+      comment = "UfsBaseFileSystem needs to support getBlockLocations for the application."
+          + "The concept of block here is HDFS block, instead of the deprecated Alluxio block.")
   public void getBlockLocations() throws Exception {
     mFs.getBlockLocations(FILE);
     assertEquals(1, mRpcCountingFs.getStatusRpcCount(FILE));

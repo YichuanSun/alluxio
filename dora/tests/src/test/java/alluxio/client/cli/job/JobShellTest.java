@@ -12,7 +12,6 @@
 package alluxio.client.cli.job;
 
 import alluxio.AlluxioURI;
-import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.client.cli.fs.AbstractFileSystemShellTest;
 import alluxio.client.file.FileOutStream;
 import alluxio.client.file.URIStatus;
@@ -23,13 +22,8 @@ import alluxio.job.util.JobTestUtils;
 import alluxio.job.wire.JobInfo;
 import alluxio.job.wire.Status;
 
-import org.junit.Ignore;
-
 import java.util.concurrent.TimeoutException;
 
-@DoraTestTodoItem(action = DoraTestTodoItem.Action.REMOVE, owner = "Jianjian",
-    comment = "Job master and job worker no longer exists in dora")
-@Ignore
 public abstract class JobShellTest extends AbstractFileSystemShellTest {
 
   protected long runPersistJob() throws Exception {

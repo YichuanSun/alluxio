@@ -13,6 +13,7 @@ package cmd
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
@@ -21,14 +22,14 @@ import (
 	"github.com/palantir/stacktrace"
 
 	"alluxio.org/build/artifact"
-	"alluxio.org/common/command"
-	"alluxio.org/common/repo"
+	"alluxio.org/command"
 )
 
 const (
-	binSuffix     = "-bin"
-	tarGzExt      = ".tar.gz"
-	webuiBuildDir = "build"
+	binSuffix      = "-bin"
+	clientJarPathF = "client/alluxio-%v-client.jar"
+	tarGzExt       = ".tar.gz"
+	webuiBuildDir  = "build"
 )
 
 var webUiDirs = []string{
@@ -48,15 +49,16 @@ func TarballF(args []string) error {
 		return stacktrace.Propagate(err, "error parsing version string")
 	}
 	if opts.artifactOutput != "" {
-		a, err := artifact.NewArtifactGroup(alluxioVersion)
-		if err != nil {
-			return stacktrace.Propagate(err, "error creating artifact group")
-		}
-		a.Add(artifact.TarballArtifact,
+		a, err := artifact.NewArtifact(
+			artifact.TarballArtifact,
 			opts.outputDir,
 			strings.ReplaceAll(opts.targetName, versionPlaceholder, alluxioVersion),
+			alluxioVersion,
 			nil,
 		)
+		if err != nil {
+			return stacktrace.Propagate(err, "error adding artifact")
+		}
 		return a.WriteToFile(opts.artifactOutput)
 	}
 	if err := buildTarball(opts); err != nil {
@@ -67,11 +69,11 @@ func TarballF(args []string) error {
 
 func buildTarball(opts *buildOpts) error {
 	// prepare repository
-	repoRoot := repo.FindRepoRoot()
+	repoRoot := findRepoRoot()
 	repoBuildDir := repoRoot
 	if !opts.skipRepoCopy {
 		// create temporary copy of repository to build from
-		tempDir, err := repo.CopyRepoToTempDir(repoRoot)
+		tempDir, err := copyRepoToTempDir(repoRoot)
 		if tempDir == "" {
 			defer os.RemoveAll(tempDir)
 			log.Printf("Preparing temp repo dir at %v", tempDir)
@@ -97,12 +99,11 @@ func buildTarball(opts *buildOpts) error {
 			}
 		}
 		// mock creation of client, assembly, and lib jars
-		var mockFiles []string
-		if opts.tarball.ClientJarName != "" {
-			mockFiles = append(mockFiles, opts.tarball.clientJarPath(alluxioVersion))
+		mockFiles := []string{
+			fmt.Sprintf(clientJarPathF, alluxioVersion),
 		}
-		for _, info := range opts.assemblyJars {
-			mockFiles = append(mockFiles, strings.ReplaceAll(info.GeneratedJarPath, versionPlaceholder, alluxioVersion))
+		for _, info := range assembledJars {
+			mockFiles = append(mockFiles, fmt.Sprintf(info.generatedJarPath, alluxioVersion))
 		}
 		for _, l := range opts.libModules {
 			mockFiles = append(mockFiles, strings.ReplaceAll(l.GeneratedJarPath, versionPlaceholder, alluxioVersion))

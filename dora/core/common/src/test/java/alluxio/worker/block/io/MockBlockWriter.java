@@ -38,10 +38,6 @@ public final class MockBlockWriter extends BlockWriter {
   }
 
   @Override
-  public void abort() {
-  }
-
-  @Override
   public void close() throws IOException {
     mOutputStream.close();
     mPosition = -1;

@@ -12,7 +12,6 @@
 package alluxio.client.hadoop;
 
 import alluxio.Constants;
-import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.client.WriteType;
 import alluxio.conf.Configuration;
 import alluxio.conf.PropertyKey;
@@ -40,7 +39,6 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -53,8 +51,6 @@ import java.util.List;
  * Integration tests for {@link FileSystem#setOwner(Path, String, String)} and
  * {@link FileSystem#setPermission(Path, org.apache.hadoop.fs.permission.FsPermission)}.
  */
-@DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "jiacheng",
-    comment = "pending on perm features in dora")
 public final class FileSystemAclIntegrationTest extends BaseIntegrationTest {
   /**
    * The exception expected to be thrown.
@@ -127,7 +123,6 @@ public final class FileSystemAclIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  @Ignore
   public void mkdirsWithPermission() throws Exception {
     List<Integer> permissionValues =
         Lists.newArrayList(0111, 0222, 0333, 0444, 0555, 0666, 0777, 0755, 0733, 0644, 0533, 0511);
@@ -145,7 +140,6 @@ public final class FileSystemAclIntegrationTest extends BaseIntegrationTest {
    * It will test changing the permission of file using TFS.
    */
   @Test
-  @Ignore
   public void chmod() throws Exception {
     Path fileA = new Path("/chmodfileA");
 
@@ -172,7 +166,6 @@ public final class FileSystemAclIntegrationTest extends BaseIntegrationTest {
    * owner does not exist in the local UFS, the operation would fail.
    */
   @Test
-  @Ignore
   public void changeNonexistentOwnerForLocal() throws Exception {
     // Skip non-local UFSs.
     Assume.assumeTrue(UnderFileSystemUtils.isLocal(sUfs));
@@ -207,7 +200,6 @@ public final class FileSystemAclIntegrationTest extends BaseIntegrationTest {
    * group does not exist in the local UFS, the operation would fail.
    */
   @Test
-  @Ignore
   public void changeNonexistentGroupForLocal() throws Exception {
     // Skip non-local UFSs.
     Assume.assumeTrue(UnderFileSystemUtils.isLocal(sUfs));
@@ -242,7 +234,6 @@ public final class FileSystemAclIntegrationTest extends BaseIntegrationTest {
    * arbitrary owner and group do not exist in the local UFS, the operation would fail.
    */
   @Test
-  @Ignore
   public void changeNonexistentOwnerAndGroupForLocal() throws Exception {
     // Skip non-local UFSs.
     Assume.assumeTrue(UnderFileSystemUtils.isLocal(sUfs));
@@ -402,7 +393,6 @@ public final class FileSystemAclIntegrationTest extends BaseIntegrationTest {
    * Tests the directory permission propagation to UFS.
    */
   @Test
-  @Ignore
   public void directoryPermissionForUfs() throws IOException {
     // Skip non-local and non-HDFS UFSs.
     Assume.assumeTrue(UnderFileSystemUtils.isLocal(sUfs) || UnderFileSystemUtils.isHdfs(sUfs));
@@ -434,7 +424,6 @@ public final class FileSystemAclIntegrationTest extends BaseIntegrationTest {
    * Tests the parent directory permission when mkdirs recursively.
    */
   @Test
-  @Ignore
   public void parentDirectoryPermissionForUfs() throws IOException {
     // Skip non-local and non-HDFS UFSs.
     Assume.assumeTrue(UnderFileSystemUtils.isLocal(sUfs) || UnderFileSystemUtils.isHdfs(sUfs));
@@ -465,7 +454,6 @@ public final class FileSystemAclIntegrationTest extends BaseIntegrationTest {
    * Tests the loaded file metadata from UFS having the same mode as that in the UFS.
    */
   @Test
-  @Ignore
   public void loadFileMetadataMode() throws Exception {
     // Skip non-local and non-HDFS-2 UFSs.
     Assume.assumeTrue(UnderFileSystemUtils.isLocal(sUfs)
@@ -492,7 +480,6 @@ public final class FileSystemAclIntegrationTest extends BaseIntegrationTest {
    * Tests the loaded directory metadata from UFS having the same mode as that in the UFS.
    */
   @Test
-  @Ignore
   public void loadDirMetadataMode() throws Exception {
     // Skip non-local and non-HDFS UFSs.
     Assume.assumeTrue(UnderFileSystemUtils.isLocal(sUfs) || UnderFileSystemUtils.isHdfs(sUfs));

@@ -18,8 +18,6 @@ import (
 	"regexp"
 
 	"github.com/palantir/stacktrace"
-
-	"alluxio.org/common/repo"
 )
 
 func VersionF() error {
@@ -35,7 +33,7 @@ func VersionF() error {
 var versionRe = regexp.MustCompile(".*<version>(.*)</version>.*")
 
 func alluxioVersionFromPom() (string, error) {
-	rootPomPath := filepath.Join(repo.FindRepoRoot(), "pom.xml")
+	rootPomPath := filepath.Join(findRepoRoot(), "pom.xml")
 	contents, err := ioutil.ReadFile(rootPomPath)
 	if err != nil {
 		return "", stacktrace.Propagate(err, "error reading %v", rootPomPath)

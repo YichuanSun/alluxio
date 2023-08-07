@@ -12,21 +12,16 @@
 package alluxio.client.cli.fs.command;
 
 import alluxio.AlluxioURI;
-import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.client.cli.fs.AbstractFileSystemShellTest;
 import alluxio.client.file.FileSystemTestUtils;
 import alluxio.grpc.WritePType;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
  * Tests for test command.
  */
-@DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "jiacheng",
-    comment = "fix the @Ignore tests")
-@Ignore
 public final class TestCommandIntegrationTest extends AbstractFileSystemShellTest {
   @Test
   public void testPathIsDirectoryWhenPathNotExist() throws Exception {
@@ -42,7 +37,6 @@ public final class TestCommandIntegrationTest extends AbstractFileSystemShellTes
   }
 
   @Test
-  @Ignore
   public void testPathIsDirectoryWhenPathIsFile() throws Exception {
     FileSystemTestUtils
         .createByteFile(sFileSystem, "/testFile", WritePType.MUST_CACHE, 10);
@@ -64,7 +58,6 @@ public final class TestCommandIntegrationTest extends AbstractFileSystemShellTes
   }
 
   @Test
-  @Ignore
   public void testPathIsFileWhenPathIsFile() throws Exception {
     FileSystemTestUtils
         .createByteFile(sFileSystem, "/testFile", WritePType.MUST_CACHE, 10);
@@ -86,7 +79,6 @@ public final class TestCommandIntegrationTest extends AbstractFileSystemShellTes
   }
 
   @Test
-  @Ignore
   public void testPathExistWhenPathIsFile() throws Exception {
     FileSystemTestUtils
         .createByteFile(sFileSystem, "/testFile", WritePType.MUST_CACHE, 10);
@@ -101,7 +93,6 @@ public final class TestCommandIntegrationTest extends AbstractFileSystemShellTes
   }
 
   @Test
-  @Ignore
   public void testDirNotEmptyWhenPathIsDirectory() throws Exception {
     FileSystemTestUtils
         .createByteFile(sFileSystem, "/testDir1/testFile1", WritePType.MUST_CACHE, 0);
@@ -150,7 +141,6 @@ public final class TestCommandIntegrationTest extends AbstractFileSystemShellTes
   }
 
   @Test
-  @Ignore
   public void testFileZeroLengthWhenPathIsFile() throws Exception {
     FileSystemTestUtils
         .createByteFile(sFileSystem, "/testFile1", WritePType.MUST_CACHE, 0);

@@ -99,16 +99,6 @@ class ByteArrayCacheManager implements CacheManager {
   }
 
   @Override
-  public void deleteFile(String fileId) {
-    mPages.keySet().removeIf(pageId -> pageId.getFileId().equals(fileId));
-  }
-
-  @Override
-  public void deleteTempFile(String fileId) {
-    mPages.keySet().removeIf(pageId -> pageId.getFileId().equals(fileId));
-  }
-
-  @Override
   public Optional<CacheUsage> getUsage() {
     return Optional.of(new Usage());
   }

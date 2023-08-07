@@ -17,7 +17,6 @@ import static org.junit.Assert.assertTrue;
 
 import alluxio.AlluxioURI;
 import alluxio.TestLoggerRule;
-import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.cli.fs.FileSystemShell;
 import alluxio.client.cli.fs.AbstractFileSystemShellTest;
 import alluxio.client.cli.fs.FileSystemShellUtilsTest;
@@ -39,7 +38,6 @@ import alluxio.util.io.PathUtils;
 
 import org.junit.Assert;
 import org.junit.Assume;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -51,9 +49,6 @@ import java.util.List;
  */
 @LocalAlluxioClusterResource.ServerConfig(
     confParams = {PropertyKey.Name.MASTER_PERSISTENCE_BLACKLIST, "foobar_blacklist"})
-@DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "bowen",
-    comment = "fix persist command command")
-@Ignore
 public final class PersistCommandTest extends AbstractFileSystemShellTest {
 
   @Rule

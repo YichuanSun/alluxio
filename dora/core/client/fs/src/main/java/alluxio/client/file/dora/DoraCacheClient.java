@@ -29,9 +29,6 @@ import alluxio.client.file.dora.netty.NettyDataWriter;
 import alluxio.client.file.options.OutStreamOptions;
 import alluxio.collections.Pair;
 import alluxio.conf.PropertyKey;
-import alluxio.exception.AlluxioException;
-import alluxio.exception.FileDoesNotExistException;
-import alluxio.exception.InvalidPathException;
 import alluxio.exception.status.PermissionDeniedException;
 import alluxio.grpc.CompleteFilePOptions;
 import alluxio.grpc.CompleteFilePRequest;
@@ -42,9 +39,6 @@ import alluxio.grpc.CreateFilePRequest;
 import alluxio.grpc.CreateFilePResponse;
 import alluxio.grpc.DeletePOptions;
 import alluxio.grpc.DeletePRequest;
-import alluxio.grpc.ExistsPOptions;
-import alluxio.grpc.ExistsPRequest;
-import alluxio.grpc.ExistsPResponse;
 import alluxio.grpc.FileInfo;
 import alluxio.grpc.GetStatusPOptions;
 import alluxio.grpc.GetStatusPRequest;
@@ -55,8 +49,6 @@ import alluxio.grpc.ReadRequest;
 import alluxio.grpc.RenamePOptions;
 import alluxio.grpc.RenamePRequest;
 import alluxio.grpc.RequestType;
-import alluxio.grpc.SetAttributePOptions;
-import alluxio.grpc.SetAttributePRequest;
 import alluxio.proto.dataserver.Protocol;
 import alluxio.resource.CloseableResource;
 import alluxio.uri.UfsUrl;
@@ -66,7 +58,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.annotation.Nullable;
 
 /**
  * Dora cache client.
@@ -84,10 +75,11 @@ public class DoraCacheClient {
    * Constructor.
    *
    * @param context
+   * @param workerLocationPolicy
    */
-  public DoraCacheClient(FileSystemContext context) {
+  public DoraCacheClient(FileSystemContext context, WorkerLocationPolicy workerLocationPolicy) {
     mContext = context;
-    mWorkerLocationPolicy = WorkerLocationPolicy.Factory.create(context.getClusterConf());
+    mWorkerLocationPolicy = workerLocationPolicy;
     mChunkSize = mContext.getClusterConf().getBytes(
         PropertyKey.USER_STREAMING_READER_CHUNK_SIZE_BYTES);
     mNettyTransEnabled =
@@ -103,7 +95,7 @@ public class DoraCacheClient {
    */
   public PositionReadFileInStream getInStream(URIStatus status,
       Protocol.OpenUfsBlockOptions ufsOptions) {
-    WorkerNetAddress workerNetAddress = getWorkerNetAddress(status.getUfsPath());
+    WorkerNetAddress workerNetAddress = getWorkerNetAddress(status.getPath());
     // Construct the partial read request
     NettyDataReader reader;
     if (mNettyTransEnabled) {
@@ -125,9 +117,9 @@ public class DoraCacheClient {
    * @return the output stream
    */
   public DoraFileOutStream getOutStream(AlluxioURI alluxioPath, FileSystemContext fsContext,
-      OutStreamOptions outStreamOptions, @Nullable FileOutStream ufsOutStream,
+      OutStreamOptions outStreamOptions, FileOutStream ufsOutStream,
       String uuid) throws IOException {
-    WorkerNetAddress workerNetAddress = getWorkerNetAddress(alluxioPath.toString());
+    WorkerNetAddress workerNetAddress = getWorkerNetAddress(alluxioPath.getPath());
     NettyDataWriter writer = NettyDataWriter.create(
         fsContext, workerNetAddress, Long.MAX_VALUE, RequestType.ALLUXIO_BLOCK, outStreamOptions);
     return new DoraFileOutStream(this, writer, alluxioPath,
@@ -147,7 +139,7 @@ public class DoraCacheClient {
   public DoraCachePositionReader createNettyPositionReader(URIStatus status,
       Protocol.OpenUfsBlockOptions ufsOptions,
       CloseableSupplier<PositionReader> externalPositionReader) {
-    WorkerNetAddress workerNetAddress = getWorkerNetAddress(status.toString());
+    WorkerNetAddress workerNetAddress = getWorkerNetAddress(status.getPath());
     // Construct the partial read request
     NettyDataReader reader = createNettyDataReader(workerNetAddress, ufsOptions);
     return new DoraCachePositionReader(reader, status.getLength(), externalPositionReader);
@@ -360,69 +352,22 @@ public class DoraCacheClient {
   }
 
   /**
-   * Check existence of a file or dir.
-   * @param path the path of the file or dir
-   * @param options the option of this operation
-   * @return true if the file/dir exists, false otherwise
-   * @throws InvalidPathException
-   * @throws IOException
-   * @throws AlluxioException
-   */
-  public boolean exists(String path, ExistsPOptions options)
-      throws InvalidPathException, IOException, AlluxioException {
-    try (CloseableResource<BlockWorkerClient> client =
-             mContext.acquireBlockWorkerClient(getWorkerNetAddress(path))) {
-      ExistsPRequest request = ExistsPRequest.newBuilder()
-          .setPath(path)
-          .setOptions(options)
-          .build();
-      ExistsPResponse response = client.get().exists(request);
-      return response.getExists();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
-   * Set attributes for a file or dir.
-   * @param path the path of the file or dir
-   * @param options the option of this operation
-   * @throws FileDoesNotExistException
-   * @throws IOException
-   * @throws AlluxioException
-   */
-  public void setAttribute(String path, SetAttributePOptions options)
-      throws FileDoesNotExistException, IOException, AlluxioException {
-    try (CloseableResource<BlockWorkerClient> client =
-             mContext.acquireBlockWorkerClient(getWorkerNetAddress(path))) {
-      SetAttributePRequest request = SetAttributePRequest.newBuilder()
-          .setPath(path)
-          .setOptions(options)
-          .build();
-      client.get().setAttribute(request);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  /**
    * Get the worker net address of the specific file path.
    * @param path the file path
    * @return the related worker net address where file locates
    */
   public WorkerNetAddress getWorkerNetAddress(String path) {
+    List<BlockWorkerInfo> workers = null;
     try {
-      List<BlockWorkerInfo> workers = mContext.getCachedWorkers();
-      List<BlockWorkerInfo> preferredWorkers =
-          mWorkerLocationPolicy.getPreferredWorkers(workers,
-              path, PREFERRED_WORKER_COUNT);
-      checkState(preferredWorkers.size() > 0);
-      WorkerNetAddress workerNetAddress = preferredWorkers.get(0).getNetAddress();
-      return workerNetAddress;
+      workers = mContext.getCachedWorkers();
     } catch (IOException e) {
-      // If failed to find workers in the cluster or failed to find the specified number of
-      // workers, throw an exception to the application
       throw new RuntimeException(e);
     }
+    List<BlockWorkerInfo> preferredWorkers =
+        mWorkerLocationPolicy.getPreferredWorkers(workers,
+            path, PREFERRED_WORKER_COUNT);
+    checkState(preferredWorkers.size() > 0);
+    WorkerNetAddress workerNetAddress = preferredWorkers.get(0).getNetAddress();
+    return workerNetAddress;
   }
 }

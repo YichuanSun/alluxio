@@ -19,21 +19,11 @@ import java.text.MessageFormat;
 public class BlockDoesNotExistRuntimeException extends NotFoundRuntimeException {
 
   /**
-   * Constructs a new exception with the specified block ID.
+   * Constructs a new exception with the specified detail message and cause.
    *
    * @param blockId block id
    */
   public BlockDoesNotExistRuntimeException(long blockId) {
     super(MessageFormat.format("BlockMeta not found for blockId {0,number,#}", blockId));
-  }
-
-  /**
-   * Constructs a new exception with the specified block ID and cause.
-   *
-   * @param blockId block id
-   * @param cause why the block is not found
-   */
-  public BlockDoesNotExistRuntimeException(long blockId, Throwable cause) {
-    super(MessageFormat.format("Block {0,number,#} not found", blockId), cause);
   }
 }

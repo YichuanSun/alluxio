@@ -19,16 +19,20 @@ import (
 	"github.com/palantir/stacktrace"
 	"gopkg.in/yaml.v3"
 
-	"alluxio.org/common/command"
+	"alluxio.org/command"
 )
 
-func NewArtifactGroup(version string) (*ArtifactGroup, error) {
+func NewArtifact(artifactType ArtifactType, outputDir, targetName, version string, metadata map[string]string) (*Artifact, error) {
 	hOut, err := command.New("git rev-parse --short HEAD").Output()
 	if err != nil {
 		return nil, stacktrace.Propagate(err, "error getting commit hash")
 	}
 
-	return &ArtifactGroup{
+	return &Artifact{
+		Type:     artifactType,
+		Path:     filepath.Join(outputDir, targetName),
+		Version:  version,
+		Metadata: metadata,
 		RepoMetadata: &RepoMetadata{
 			CommitHash: strings.TrimSpace(string(hOut)),
 			Version:    version,
@@ -36,18 +40,7 @@ func NewArtifactGroup(version string) (*ArtifactGroup, error) {
 	}, nil
 }
 
-func (a *ArtifactGroup) Add(artifactType ArtifactType, outputDir, targetName string, metadata map[string]string) *Artifact {
-	newArt := &Artifact{
-		Type:     artifactType,
-		Path:     filepath.Join(outputDir, targetName),
-		Version:  a.RepoMetadata.Version,
-		Metadata: metadata,
-	}
-	a.Artifacts = append(a.Artifacts, newArt)
-	return newArt
-}
-
-func (a *ArtifactGroup) WriteToFile(outputFile string) error {
+func (a *Artifact) WriteToFile(outputFile string) error {
 	yOut, err := yaml.Marshal(a)
 	if err != nil {
 		return stacktrace.Propagate(err, "error marshalling artifact to yaml")

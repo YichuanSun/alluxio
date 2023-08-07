@@ -11,7 +11,6 @@
 
 package alluxio.client.hadoop;
 
-import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.client.WriteType;
 import alluxio.conf.Configuration;
 import alluxio.conf.PropertyKey;
@@ -38,9 +37,6 @@ import java.net.URI;
  * Integration tests for {@link FileSystem#rename(Path, Path)}.
  */
 // TODO(jiri): Test persisting rename operations to UFS.
-@DoraTestTodoItem(action = DoraTestTodoItem.Action.REMOVE, owner = "jiaming",
-    comment = "adapt rename to the new arch")
-@Ignore
 public final class FileSystemRenameIntegrationTest extends BaseIntegrationTest {
   @ClassRule
   public static LocalAlluxioClusterResource sLocalAlluxioClusterResource =
@@ -82,7 +78,6 @@ public final class FileSystemRenameIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  @Ignore
   public void basicRenameTest1() throws Exception {
     // Rename /fileA to /fileB
     Path fileA = new Path("/fileA");
@@ -104,7 +99,6 @@ public final class FileSystemRenameIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  @Ignore
   public void basicRenameTest2() throws Exception {
     // Rename /fileA to /dirA/fileA
     Path fileA = new Path("/fileA");
@@ -129,7 +123,6 @@ public final class FileSystemRenameIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  @Ignore
   public void basicRenameTest3() throws Exception {
     // Rename /fileA to /dirA/fileA without specifying the full path
     Path fileA = new Path("/fileA");
@@ -154,7 +147,6 @@ public final class FileSystemRenameIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  @Ignore
   public void basicRenameTest4() throws Exception {
     // Rename /fileA to /fileA
     Path fileA = new Path("/fileA");
@@ -173,7 +165,6 @@ public final class FileSystemRenameIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  @Ignore
   public void basicRenameTest5() throws Exception {
     // Rename /fileA to /fileAfileA
     Path fileA = new Path("/fileA");
@@ -195,7 +186,6 @@ public final class FileSystemRenameIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  @Ignore
   public void basicRenameTest6() throws Exception {
     // Rename /dirA to /dirB, /dirA/fileA should become /dirB/fileA
     Path dirA = new Path("/dirA");
@@ -262,7 +252,6 @@ public final class FileSystemRenameIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  @Ignore
   public void errorRenameTest1() throws Exception {
     // Rename /dirA to /dirA/dirB should fail
     Path dirA = new Path("/dirA");
@@ -284,7 +273,6 @@ public final class FileSystemRenameIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  @Ignore
   public void errorRenameTest2() throws Exception {
     // Rename /fileA to /fileB should fail if /fileB exists
     Path fileA = new Path("/fileA");
@@ -309,7 +297,6 @@ public final class FileSystemRenameIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  @Ignore
   public void errorRenameTest3() throws Exception {
     // Rename /fileA to /dirA/fileA should fail if /dirA/fileA exists
     Path fileA = new Path("/fileA");
@@ -339,7 +326,6 @@ public final class FileSystemRenameIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  @Ignore
   public void errorRenameTest4() throws Exception {
     // Rename /fileA to an nonexistent path should fail
     Path fileA = new Path("/fileA");

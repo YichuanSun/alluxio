@@ -1211,6 +1211,37 @@ public final class MetricKey implements Comparable<MetricKey> {
           .setIsClusterAggregated(true)
           .build();
   // Distributed command related metrics
+  public static final MetricKey MASTER_JOB_DISTRIBUTED_LOAD_SUCCESS =
+      new Builder("Master.JobDistributedLoadSuccess")
+          .setDescription("The number of successful DistributedLoad operations")
+          .setMetricType(MetricType.COUNTER)
+          .build();
+  public static final MetricKey MASTER_JOB_DISTRIBUTED_LOAD_FAIL =
+      new Builder("Master.JobDistributedLoadFail")
+          .setDescription("The number of failed DistributedLoad operations")
+          .setMetricType(MetricType.COUNTER)
+          .build();
+  public static final MetricKey MASTER_JOB_DISTRIBUTED_LOAD_CANCEL =
+      new Builder("Master.JobDistributedLoadCancel")
+          .setDescription("The number of cancelled DistributedLoad operations")
+          .setMetricType(MetricType.COUNTER)
+          .build();
+  public static final MetricKey MASTER_JOB_DISTRIBUTED_LOAD_FILE_COUNT =
+      new Builder("Master.JobDistributedLoadFileCount")
+          .setDescription("The number of files by DistributedLoad operations")
+          .setMetricType(MetricType.COUNTER)
+          .build();
+  public static final MetricKey MASTER_JOB_DISTRIBUTED_LOAD_FILE_SIZE =
+      new Builder("Master.JobDistributedLoadFileSizes")
+          .setDescription("The total file size by DistributedLoad operations")
+          .setMetricType(MetricType.COUNTER)
+          .build();
+  public static final MetricKey MASTER_JOB_DISTRIBUTED_LOAD_RATE =
+      new Builder("Master.JobDistributedLoadRate")
+          .setDescription("The average DistributedLoad loading rate")
+          .setMetricType(MetricType.METER)
+          .setIsClusterAggregated(true)
+          .build();
   public static final MetricKey MASTER_MIGRATE_JOB_SUCCESS =
       new Builder("Master.MigrateJobSuccess")
           .setDescription("The number of successful MigrateJob operations")
@@ -1582,7 +1613,7 @@ public final class MetricKey implements Comparable<MetricKey> {
       new Builder("Cluster.BytesReadRemote")
           .setDescription("Total number of bytes read from all workers via network (RPC). "
               + "Data exists in worker storage or is fetched by workers from UFSes. "
-              + "This does not include domain socket reads")
+              + "This does not include short-circuit local reads and domain socket reads")
           .setMetricType(MetricType.COUNTER)
           .build();
   public static final MetricKey CLUSTER_BYTES_READ_REMOTE_THROUGHPUT =
@@ -1590,7 +1621,7 @@ public final class MetricKey implements Comparable<MetricKey> {
           .setDescription("Bytes read per minute throughput from all workers "
               + "via network (RPC calls). Data exists in worker storage "
               + "or is fetched by workers from UFSes. This does not include "
-              + "domain socket reads")
+              + "short-circuit local reads and domain socket reads")
           .setMetricType(MetricType.GAUGE)
           .build();
   public static final MetricKey CLUSTER_BYTES_READ_DOMAIN =
@@ -1603,6 +1634,18 @@ public final class MetricKey implements Comparable<MetricKey> {
       new Builder("Cluster.BytesReadDomainThroughput")
           .setDescription("Bytes read per minute throughput from all workers "
               + "via domain socket")
+          .setMetricType(MetricType.GAUGE)
+          .build();
+  public static final MetricKey CLUSTER_BYTES_READ_LOCAL =
+      new Builder("Cluster.BytesReadLocal")
+          .setDescription("Total number of bytes short-circuit read reported by all clients. "
+              + "Each client reads data from the collocated worker data storage directly.")
+          .setMetricType(MetricType.COUNTER)
+          .build();
+  public static final MetricKey CLUSTER_BYTES_READ_LOCAL_THROUGHPUT =
+      new Builder("Cluster.BytesReadLocalThroughput")
+          .setDescription("Bytes per minute throughput "
+              + "short-circuit read reported by all clients")
           .setMetricType(MetricType.GAUGE)
           .build();
   public static final MetricKey CLUSTER_BYTES_READ_UFS =
@@ -1624,14 +1667,15 @@ public final class MetricKey implements Comparable<MetricKey> {
       new Builder("Cluster.BytesWrittenRemote")
           .setDescription("Total number of bytes written to workers via network (RPC). "
               + "Data is written to worker storage or is written by workers to underlying UFSes. "
-              + "This does not include domain socket writes.")
+              + "This does not include short-circuit local writes and domain socket writes.")
           .setMetricType(MetricType.COUNTER)
           .build();
   public static final MetricKey CLUSTER_BYTES_WRITTEN_REMOTE_THROUGHPUT =
       new Builder("Cluster.BytesWrittenRemoteThroughput")
           .setDescription("Bytes write per minute throughput to workers via network (RPC). "
               + "Data is written to worker storage or is written by workers to underlying UFSes. "
-              + "This does not include domain socket writes.")
+              + "This does not include short-circuit local writes "
+              + "and domain socket writes.")
           .setMetricType(MetricType.GAUGE)
           .build();
   public static final MetricKey CLUSTER_BYTES_WRITTEN_DOMAIN =
@@ -1644,6 +1688,18 @@ public final class MetricKey implements Comparable<MetricKey> {
       new Builder("Cluster.BytesWrittenDomainThroughput")
           .setDescription("Throughput of bytes written per minute to all workers "
               + "via domain socket")
+          .setMetricType(MetricType.GAUGE)
+          .build();
+  public static final MetricKey CLUSTER_BYTES_WRITTEN_LOCAL =
+      new Builder("Cluster.BytesWrittenLocal")
+          .setDescription("Total number of bytes short-circuit written to "
+              + "local worker data storage by all clients")
+          .setMetricType(MetricType.COUNTER)
+          .build();
+  public static final MetricKey CLUSTER_BYTES_WRITTEN_LOCAL_THROUGHPUT =
+      new Builder("Cluster.BytesWrittenLocalThroughput")
+          .setDescription("Bytes per minute throughput written to "
+              + "local worker data storage by all clients")
           .setMetricType(MetricType.GAUGE)
           .build();
   public static final MetricKey CLUSTER_BYTES_WRITTEN_UFS =
@@ -1820,6 +1876,12 @@ public final class MetricKey implements Comparable<MetricKey> {
           .setMetricType(MetricType.COUNTER)
           .setIsClusterAggregated(false)
           .build();
+  public static final MetricKey WORKER_BLOCKS_READ_LOCAL =
+      new Builder("Worker.BlocksReadLocal")
+          .setDescription("Total number of local blocks read by this worker.")
+          .setMetricType(MetricType.COUNTER)
+          .setIsClusterAggregated(false)
+          .build();
   public static final MetricKey WORKER_BLOCKS_READ_REMOTE =
       new Builder("Worker.BlocksReadRemote")
           .setDescription("Total number of a remote blocks read by this worker.")
@@ -1856,7 +1918,7 @@ public final class MetricKey implements Comparable<MetricKey> {
       new Builder("Worker.BytesReadRemote")
           .setDescription("Total number of bytes read from the this worker via network (RPC). "
               + "Data exists in worker storage or is fetched by this worker from underlying UFSes. "
-              + "This does not include domain socket reads.")
+              + "This does not include short-circuit local reads and domain socket reads.")
           .setMetricType(MetricType.COUNTER)
           .setIsClusterAggregated(true)
           .build();
@@ -1864,7 +1926,7 @@ public final class MetricKey implements Comparable<MetricKey> {
       new Builder("Worker.BytesReadRemoteThroughput")
           .setDescription("Throughput of bytes read from the this worker via network (RPC). "
               + "Data exists in worker storage or is fetched by this worker from underlying UFSes. "
-              + "This does not include domain socket reads")
+              + "This does not include short-circuit local reads and domain socket reads")
           .setMetricType(MetricType.METER)
           .setIsClusterAggregated(false)
           .build();
@@ -1916,7 +1978,8 @@ public final class MetricKey implements Comparable<MetricKey> {
       new Builder("Worker.BytesWrittenRemote")
           .setDescription("Total number of bytes written to this worker via network (RPC). "
               + "Data is written to worker storage or is written by this worker "
-              + "to underlying UFSes. This does not include domain socket writes.")
+              + "to underlying UFSes. This does not include short-circuit local writes "
+              + "and domain socket writes.")
           .setMetricType(MetricType.COUNTER)
           .setIsClusterAggregated(true)
           .build();
@@ -1924,7 +1987,8 @@ public final class MetricKey implements Comparable<MetricKey> {
       new Builder("Worker.BytesWrittenRemoteThroughput")
           .setDescription("Bytes write throughput to this worker via network (RPC). "
               + "Data is written to worker storage or is written by this worker "
-              + "to underlying UFSes. This does not include domain socket writes.")
+              + "to underlying UFSes. This does not include short-circuit local writes "
+              + "and domain socket writes.")
           .setMetricType(MetricType.METER)
           .setIsClusterAggregated(false)
           .build();
@@ -2204,6 +2268,34 @@ public final class MetricKey implements Comparable<MetricKey> {
           .setMetricType(MetricType.COUNTER)
           .setIsClusterAggregated(true)
           .build();
+  public static final MetricKey CLIENT_BYTES_READ_LOCAL =
+      new Builder("Client.BytesReadLocal")
+          .setDescription("Total number of bytes short-circuit read from worker data storage "
+              + "that collocates with the client")
+          .setMetricType(MetricType.COUNTER)
+          .setIsClusterAggregated(true)
+          .build();
+  public static final MetricKey CLIENT_BYTES_READ_LOCAL_THROUGHPUT =
+      new Builder("Client.BytesReadLocalThroughput")
+          .setDescription("Bytes throughput short-circuit read from worker data storage "
+              + "that collocated with this client")
+          .setMetricType(MetricType.METER)
+          .setIsClusterAggregated(false)
+          .build();
+  public static final MetricKey CLIENT_BYTES_WRITTEN_LOCAL =
+      new Builder("Client.BytesWrittenLocal")
+          .setDescription("Total number of bytes short-circuit written to local storage "
+              + "by this client")
+          .setMetricType(MetricType.COUNTER)
+          .setIsClusterAggregated(true)
+          .build();
+  public static final MetricKey CLIENT_BYTES_WRITTEN_LOCAL_THROUGHPUT =
+      new Builder("Client.BytesWrittenLocalThroughput")
+          .setDescription("Bytes throughput short-circuit written to local storage by this client")
+          .setMetricType(MetricType.METER)
+          .setIsClusterAggregated(false)
+          .build();
+
   public static final MetricKey CLIENT_BYTES_WRITTEN_ALLUXIO =
       new Builder("Client.BytesWrittenAlluxio")
           .setDescription("Total number of bytes write to Alluxio by this client")
@@ -2244,12 +2336,6 @@ public final class MetricKey implements Comparable<MetricKey> {
           .setMetricType(MetricType.METER)
           .setIsClusterAggregated(false)
           .build();
-  public static final MetricKey CLIENT_CACHE_EXTERNAL_REQUESTS =
-      new Builder("Client.CacheBytesExternalRequests")
-          .setDescription("Total number of requests to read from external storage.")
-          .setMetricType(MetricType.COUNTER)
-          .setIsClusterAggregated(false)
-          .build();
   public static final MetricKey CLIENT_CACHE_PAGE_READ_CACHE_TIME_NS =
       new Builder("Client.CachePageReadCacheTimeNanos")
           .setDescription("Time in nanoseconds taken to read a page from the client cache "
@@ -2262,12 +2348,6 @@ public final class MetricKey implements Comparable<MetricKey> {
           .setDescription("Time in nanoseconds taken to read a page from external source "
               + "when the cache misses.")
           .setMetricType(MetricType.METER)
-          .setIsClusterAggregated(false)
-          .build();
-  public static final MetricKey CLIENT_CACHE_POSITION_READ_FALLBACK =
-      new Builder("Client.CacheBytesPositionReadFallback")
-          .setDescription("Total number of position read fallback to external storage.")
-          .setMetricType(MetricType.COUNTER)
           .setIsClusterAggregated(false)
           .build();
   public static final MetricKey CLIENT_CACHE_BYTES_DISCARDED =
@@ -2294,13 +2374,6 @@ public final class MetricKey implements Comparable<MetricKey> {
           .setMetricType(MetricType.METER)
           .setIsClusterAggregated(false)
           .build();
-  public static final MetricKey CLIENT_CACHE_PAGES_INVALIDATED =
-      new Builder("Client.CachePagesInvalidated")
-          .setDescription("Total number of pages invalidated by TTL rules")
-          .setMetricType(MetricType.METER)
-          .setIsClusterAggregated(false)
-          .build();
-
   public static final MetricKey CLIENT_CACHE_PAGES_EVICTED =
       new Builder("Client.CachePagesEvicted")
           .setDescription("Total number of pages evicted from the client cache.")
@@ -2317,12 +2390,6 @@ public final class MetricKey implements Comparable<MetricKey> {
       new Builder("Client.CacheHitRate")
           .setDescription("Cache hit rate: (# bytes read from cache) / (# bytes requested).")
           .setMetricType(MetricType.GAUGE)
-          .setIsClusterAggregated(false)
-          .build();
-  public static final MetricKey CLIENT_CACHE_HIT_REQUESTS =
-      new Builder("Client.CacheHitRequests")
-          .setDescription("Total number of requests of hitting the cache.")
-          .setMetricType(MetricType.COUNTER)
           .setIsClusterAggregated(false)
           .build();
   public static final MetricKey CLIENT_CACHE_SPACE_AVAILABLE =

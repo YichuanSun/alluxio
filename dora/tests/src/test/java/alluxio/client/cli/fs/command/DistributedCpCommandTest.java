@@ -13,13 +13,11 @@ package alluxio.client.cli.fs.command;
 
 import static org.junit.Assert.assertEquals;
 
-import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.client.cli.fs.AbstractFileSystemShellTest;
 import alluxio.util.io.PathUtils;
 
 import com.google.common.base.Joiner;
 import com.google.common.io.Files;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -31,9 +29,6 @@ import java.util.List;
 /**
  * Tests for cross-mount {@link alluxio.cli.fs.command.DistributedCpCommand}.
  */
-@Ignore
-@DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "jianjian",
-    comment = "fix or remove these tests")
 public final class DistributedCpCommandTest extends AbstractFileSystemShellTest {
   @Rule
   public TemporaryFolder mFolder = new TemporaryFolder();

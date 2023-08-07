@@ -144,6 +144,8 @@ public final class NettyDataWriter implements DataWriter {
         return Protocol.RequestType.ALLUXIO_BLOCK;
       case UFS_FILE:
         return Protocol.RequestType.UFS_FILE;
+      case UFS_FALLBACK_BLOCK:
+        throw new UnsupportedOperationException("Unsupported request type UFS_FALLBACK_BLOCK. ");
       default:
         throw new UnsupportedOperationException("Request type needs to be specified. ");
     }

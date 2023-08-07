@@ -15,7 +15,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import alluxio.AlluxioURI;
-import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.cli.fs.FileSystemShell;
 import alluxio.client.file.FileSystem;
 import alluxio.conf.Configuration;
@@ -26,7 +25,6 @@ import alluxio.testutils.IntegrationTestUtils;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -71,9 +69,6 @@ public final class JobServiceFaultToleranceShellTest extends BaseIntegrationTest
   }
 
   @Test
-  @DoraTestTodoItem(action = DoraTestTodoItem.Action.REMOVE, owner = "bowen",
-      comment = "job master and job worker are deprecated")
-  @Ignore
   public void distributedCp() throws Exception {
     FileSystem fs = FileSystem.Factory.create();
     try (OutputStream out = fs.createFile(new AlluxioURI("/test"))) {

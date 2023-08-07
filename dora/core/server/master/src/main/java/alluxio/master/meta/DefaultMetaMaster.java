@@ -13,7 +13,6 @@ package alluxio.master.meta;
 
 import alluxio.ClientContext;
 import alluxio.Constants;
-import alluxio.ProjectConstants;
 import alluxio.Server;
 import alluxio.clock.SystemClock;
 import alluxio.collections.IndexDefinition;
@@ -157,7 +156,7 @@ public final class DefaultMetaMaster extends CoreMaster implements MetaMaster {
   /** Path level properties. */
   private final PathProperties mPathProperties;
 
-  /** Persisted state for {@link MetaMaster}. */
+  /** Persisted state for MetaMaster. */
   private final State mState;
 
   /** Value to be used for the cluster ID when not assigned. */
@@ -170,7 +169,7 @@ public final class DefaultMetaMaster extends CoreMaster implements MetaMaster {
   private final JournalSpaceMonitor mJournalSpaceMonitor;
 
   /**
-   * Journaled state for {@link MetaMaster}.
+   * Journaled state for MetaMaster.
    */
   @NotThreadSafe
   public static final class State implements alluxio.master.journal.Journaled {
@@ -357,13 +356,8 @@ public final class DefaultMetaMaster extends CoreMaster implements MetaMaster {
           mState.applyAndJournal(context, clusterID);
           LOG.info("Created new cluster ID {}", clusterID);
         }
-        // updateCheck is false only if configurable and not enabled
-        boolean updateCheck = true;
-        if (Boolean.parseBoolean(ProjectConstants.UPDATE_CHECK_CONFIGURABLE)) {
-          updateCheck = Configuration.getBoolean(PropertyKey.MASTER_UPDATE_CHECK_ENABLED);
-        }
-        if (updateCheck && !Configuration.getBoolean(PropertyKey.TEST_MODE)) {
-          // never start update check thread if in test mode
+        if (Configuration.getBoolean(PropertyKey.MASTER_UPDATE_CHECK_ENABLED)
+            && !Configuration.getBoolean(PropertyKey.TEST_MODE)) {
           getExecutorService().submit(new HeartbeatThread(HeartbeatContext.MASTER_UPDATE_CHECK,
               new UpdateChecker(this),
               () -> new FixedIntervalSupplier(
@@ -633,7 +627,6 @@ public final class DefaultMetaMaster extends CoreMaster implements MetaMaster {
 
   @Override
   public MetaCommand masterHeartbeat(long masterId, MasterHeartbeatPOptions options) {
-    LOG.debug("A heartbeat request was received from Standby master: {}.", masterId);
     MasterInfo master = mMasters.getFirstByField(ID_INDEX, masterId);
     if (master == null) {
       LOG.warn("Could not find master id: {} for heartbeat.", masterId);

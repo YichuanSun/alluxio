@@ -15,7 +15,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import alluxio.AlluxioURI;
-import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.client.file.FileOutStream;
 import alluxio.client.file.FileSystem;
 import alluxio.client.file.FileSystemTestUtils;
@@ -34,7 +33,6 @@ import alluxio.util.io.PathUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -185,9 +183,6 @@ public class FileSystemUtilsIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  @Ignore
-  @DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "bowen",
-      comment = "check persist API")
   public void waitPersistTimeoutTest() throws Exception {
     String path = PathUtils.uniqPath();
     AlluxioURI alluxioPath = new AlluxioURI(path);
@@ -198,9 +193,6 @@ public class FileSystemUtilsIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  @Ignore
-  @DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "bowen",
-      comment = "check persist API")
   public void waitPersistIndefiniteTimeoutTest() throws Exception {
     String path = PathUtils.uniqPath();
     AlluxioURI alluxioPath = new AlluxioURI(path);

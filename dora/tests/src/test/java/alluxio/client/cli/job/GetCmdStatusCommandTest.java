@@ -11,7 +11,6 @@
 
 package alluxio.client.cli.job;
 
-import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.cli.fs.FileSystemShell;
 import alluxio.cli.job.command.GetCmdStatusCommand;
 import alluxio.client.cli.fs.AbstractFileSystemShellTest;
@@ -27,7 +26,6 @@ import alluxio.testutils.LocalAlluxioClusterResource;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -37,9 +35,6 @@ import java.io.IOException;
 /**
  * Tests for getting cmd status {@link GetCmdStatusCommand}.
  */
-@DoraTestTodoItem(action = DoraTestTodoItem.Action.REMOVE, owner = "jiacheng",
-    comment = "fix or remove this test")
-@Ignore
 public class GetCmdStatusCommandTest extends AbstractFileSystemShellTest  {
   @Rule
   public TemporaryFolder mTempFolder = new TemporaryFolder();

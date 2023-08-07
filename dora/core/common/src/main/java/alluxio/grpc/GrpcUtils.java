@@ -257,9 +257,7 @@ public final class GrpcUtils {
                 : DefaultAccessControlList.EMPTY_DEFAULT_ACL)
         .setReplicationMax(pInfo.getReplicationMax()).setReplicationMin(pInfo.getReplicationMin())
         .setXAttr(pInfo.getXattrMap().entrySet().stream().collect(Collectors.toMap(Map
-            .Entry::getKey, e -> e.getValue().toByteArray())))
-        .setUfsType(pInfo.getUfsType())
-        .setContentHash(pInfo.getContentHash());
+            .Entry::getKey, e -> e.getValue().toByteArray())));
     return fileInfo;
   }
 
@@ -494,9 +492,7 @@ public final class GrpcUtils {
         .setInMemoryPercentage(fileInfo.getInMemoryPercentage())
         .setUfsFingerprint(fileInfo.getUfsFingerprint())
         .setReplicationMax(fileInfo.getReplicationMax())
-        .setReplicationMin(fileInfo.getReplicationMin())
-        .setContentHash(fileInfo.getContentHash())
-        .setUfsType(fileInfo.getUfsType());
+        .setReplicationMin(fileInfo.getReplicationMin());
 
     if (!fileInfo.getAcl().equals(AccessControlList.EMPTY_ACL)) {
       builder.setAcl(toProto(fileInfo.getAcl()));

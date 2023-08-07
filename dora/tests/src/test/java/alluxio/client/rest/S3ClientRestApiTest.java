@@ -18,7 +18,6 @@ import static org.junit.Assert.assertTrue;
 
 import alluxio.AlluxioURI;
 import alluxio.Constants;
-import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.client.WriteType;
 import alluxio.client.file.FileInStream;
 import alluxio.client.file.FileOutStream;
@@ -92,9 +91,6 @@ import javax.ws.rs.core.Response;
 /**
  * Test cases for {@link alluxio.proxy.s3.S3RestServiceHandler}.
  */
-@DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "yuyang",
-    comment = "fix the tests")
-@Ignore
 public final class S3ClientRestApiTest extends RestApiTest {
   private static final int DATA_SIZE = 16 * Constants.KB;
   // cannot be too large, since all block streams are open until file is closed, and may run out of
@@ -103,6 +99,8 @@ public final class S3ClientRestApiTest extends RestApiTest {
 
   private static final GetStatusContext GET_STATUS_CONTEXT = GetStatusContext.defaults();
   private static final XmlMapper XML_MAPPER = new XmlMapper();
+
+  private static final String TEST_USER_NAME = "testuser";
 
   private FileSystem mFileSystem;
   private FileSystemMaster mFileSystemMaster;
@@ -825,7 +823,7 @@ public final class S3ClientRestApiTest extends RestApiTest {
   }
 
   private void putBucket(String bucket) throws Exception {
-    putBucket(bucket, TEST_USER);
+    putBucket(bucket, TEST_USER_NAME);
   }
 
   private void putBucket(String bucket, String user) throws Exception {
@@ -2206,7 +2204,7 @@ public final class S3ClientRestApiTest extends RestApiTest {
   }
 
   private void createBucketRestCall(String bucketUri) throws Exception {
-    createBucketRestCall(bucketUri, TEST_USER);
+    createBucketRestCall(bucketUri, TEST_USER_NAME);
   }
 
   private void createBucketRestCall(String bucketUri, String user) throws Exception {
@@ -2241,7 +2239,7 @@ public final class S3ClientRestApiTest extends RestApiTest {
   }
 
   private String initiateMultipartUploadRestCall(String objectUri) throws Exception {
-    return initiateMultipartUploadRestCall(objectUri, TEST_USER);
+    return initiateMultipartUploadRestCall(objectUri, TEST_USER_NAME);
   }
 
   private String initiateMultipartUploadRestCall(String objectUri, String user) throws Exception {
@@ -2253,13 +2251,13 @@ public final class S3ClientRestApiTest extends RestApiTest {
   }
 
   private TestCase getCompleteMultipartUploadReadCallTestCase(
-      String objectUri, String uploadId, CompleteMultipartUploadRequest request) throws Exception {
+          String objectUri, String uploadId, CompleteMultipartUploadRequest request) {
     Map<String, String> params = ImmutableMap.of("uploadId", uploadId);
     return new TestCase(mHostname, mPort, mBaseUri,
-        objectUri, params, HttpMethod.POST,
-        getDefaultOptionsWithAuth()
-            .setBody(request)
-            .setContentType(TestCaseOptions.XML_CONTENT_TYPE));
+            objectUri, params, HttpMethod.POST,
+            getDefaultOptionsWithAuth()
+                    .setBody(request)
+                    .setContentType(TestCaseOptions.XML_CONTENT_TYPE));
   }
 
   private String completeMultipartUploadRestCall(
@@ -2293,7 +2291,7 @@ public final class S3ClientRestApiTest extends RestApiTest {
   }
 
   private String listMultipartUploadsRestCall(String bucketUri) throws Exception {
-    return listMultipartUploadsRestCall(bucketUri, TEST_USER);
+    return listMultipartUploadsRestCall(bucketUri, TEST_USER_NAME);
   }
 
   private String listMultipartUploadsRestCall(String bucketUri, String user) throws Exception {
@@ -2380,5 +2378,15 @@ public final class S3ClientRestApiTest extends RestApiTest {
     response =
             new XmlMapper().readerFor(S3Error.class).readValue(connection.getErrorStream());
     Assert.assertEquals(S3ErrorCode.Name.AUTHORIZATION_HEADER_MALFORMED, response.getCode());
+  }
+
+  private TestCaseOptions getDefaultOptionsWithAuth() {
+    return getDefaultOptionsWithAuth("testuser");
+  }
+
+  private TestCaseOptions getDefaultOptionsWithAuth(@NotNull String user) {
+    TestCaseOptions options = TestCaseOptions.defaults();
+    options.setAuthorization("AWS4-HMAC-SHA256 Credential=" + user + "/20220830");
+    return options;
   }
 }

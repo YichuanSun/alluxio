@@ -44,10 +44,8 @@ public class RocksBenchBase {
   static final String NO_SER_NO_ALLOC_READ = "noSerNoAllocRead";
 
   private final RocksInodeStore mRocksInodeStore;
-  // RocksDB resources managed by the RocksInodeStore, no need to close manually
   private final RocksDB mDB;
   private final AtomicReference<ColumnFamilyHandle> mInodesColumn;
-  // Created and managed in this class
   private final WriteOptions mDisableWAL;
 
   RocksBenchBase(String confType) throws IOException {
@@ -75,7 +73,6 @@ public class RocksBenchBase {
   void after() {
     mRocksInodeStore.clear();
     mRocksInodeStore.close();
-    mDisableWAL.close();
   }
 
   long getInodeReadId(long total, long nxt, long min, int threadCount, int threadId) {

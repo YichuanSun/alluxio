@@ -544,12 +544,12 @@ public final class S3RestUtils {
    * @return the entityTag String, or null if it does not exist
    */
   public static String getEntityTag(URIStatus status) {
-    String contenthash = status.getFileInfo().getContentHash();
-    if (StringUtils.isNotEmpty(contenthash)) {
-      return contenthash;
-    } else {
+    if (status.getXAttr() == null
+        || !status.getXAttr().containsKey(S3Constants.ETAG_XATTR_KEY)) {
       return null;
     }
+    return new String(status.getXAttr().get(S3Constants.ETAG_XATTR_KEY),
+        S3Constants.XATTR_STR_CHARSET);
   }
 
   /**

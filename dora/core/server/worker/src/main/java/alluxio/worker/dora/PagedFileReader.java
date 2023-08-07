@@ -124,7 +124,7 @@ public class PagedFileReader extends BlockReader implements PositionReader {
       DataBuffer dataBuffer;
       Optional<DataFileChannel> dataFileChannel =
           mPositionReader.getDataFileChannel(mPos, (int) lengthPerOp);
-      if (!dataFileChannel.isPresent()) {
+      if (dataFileChannel.isEmpty()) {
         dataBuffer = getDataBufferByCopying(channel, (int) lengthPerOp);
       } else {
         // update mPos

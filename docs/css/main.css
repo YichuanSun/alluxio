@@ -6,13 +6,6 @@ a.dropdown-item.active {
     color: white;
 }
 
-.table{
-    table-layout: fixed;
-}
-.table td{
-    word-break: break-word;
-}
-
 .version {
     line-height: 23px;
     vertical-align: middle;
@@ -69,7 +62,7 @@ body #content {
 }
 
 .container {
-    max-width: 100%;
+    max-width: 1200px;
 }
 
 

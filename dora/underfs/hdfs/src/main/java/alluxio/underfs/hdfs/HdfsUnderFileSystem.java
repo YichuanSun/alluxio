@@ -83,35 +83,35 @@ public class HdfsUnderFileSystem extends ConsistentUnderFileSystem
     implements AtomicFileOutputStreamCallback {
   private static final Logger LOG = LoggerFactory.getLogger(HdfsUnderFileSystem.class);
   private static final int MAX_TRY = 5;
-  protected static final String HDFS_USER = "";
+  private static final String HDFS_USER = "";
   /** Name of the class for the HDFS Acl provider. */
-  protected static final String HDFS_ACL_PROVIDER_CLASS =
+  private static final String HDFS_ACL_PROVIDER_CLASS =
       "alluxio.underfs.hdfs.acl.SupportedHdfsAclProvider";
 
   /** Name of the class for the Hdfs ActiveSync provider. */
-  protected static final String HDFS_ACTIVESYNC_PROVIDER_CLASS =
+  private static final String HDFS_ACTIVESYNC_PROVIDER_CLASS =
       "alluxio.underfs.hdfs.activesync.SupportedHdfsActiveSyncProvider";
 
   /** The minimum HDFS production version required for EC. **/
-  protected static final String HDFS_EC_MIN_VERSION = "3.0.0";
+  private static final String HDFS_EC_MIN_VERSION = "3.0.0";
 
   /** Name of the class for the HDFS EC Codec Registry. **/
-  protected static final String HDFS_EC_CODEC_REGISTRY_CLASS =
+  private static final String HDFS_EC_CODEC_REGISTRY_CLASS =
       "org.apache.hadoop.io.erasurecode.CodecRegistry";
 
-  protected static final String JAVAX_WS_RS_CORE_MEDIA_TYPE =
+  private static final String JAVAX_WS_RS_CORE_MEDIA_TYPE =
       "javax.ws.rs.core.MediaType";
 
-  protected static final String HADOOP_AUTH_METHOD =
+  private static final String HADOOP_AUTH_METHOD =
           "hadoop.security.authentication";
 
-  protected static final String KRB5_CONF_FILE =
+  private static final String KRB5_CONF_FILE =
           "java.security.krb5.conf";
 
-  protected static final String KRB_KEYTAB_LOGIN_AUTO_RENEW =
+  private static final String KRB_KEYTAB_LOGIN_AUTO_RENEW =
           "hadoop.kerberos.keytab.login.autorenewal.enabled";
 
-  protected static final String CHECKSUM_COMBINE_MODE =
+  private static final String CHECKSUM_COMBINE_MODE =
           "dfs.checksum.combine.mode";
 
   private final LoadingCache<String, FileSystem> mUserFs;
@@ -141,11 +141,6 @@ public class HdfsUnderFileSystem extends ConsistentUnderFileSystem
    */
   public HdfsUnderFileSystem(AlluxioURI ufsUri, UnderFileSystemConfiguration conf,
       Configuration hdfsConf) {
-    this(ufsUri, conf, hdfsConf, true);
-  }
-
-  protected HdfsUnderFileSystem(AlluxioURI ufsUri, UnderFileSystemConfiguration conf,
-      Configuration hdfsConf, boolean useLoadingCache) {
     super(ufsUri, conf);
 
     // Create the supported HdfsAclProvider if possible.
@@ -222,30 +217,26 @@ public class HdfsUnderFileSystem extends ConsistentUnderFileSystem
       Thread.currentThread().setContextClassLoader(currentClassLoader);
     }
 
-    if (useLoadingCache) {
-      mUserFs = CacheBuilder.newBuilder().build(new CacheLoader<String, FileSystem>() {
-        @Override
-        public FileSystem load(String userKey) throws Exception {
-          // When running {@link UnderFileSystemContractTest} with hdfs path,
-          // the org.apache.hadoop.fs.FileSystem is loaded by {@link ExtensionClassLoader},
-          // but the org.apache.hadoop.fs.LocalFileSystem is loaded by {@link AppClassLoader}.
-          // When an interface and associated implementation are each loaded
-          // by two separate class loaders, an instance of the class from one loader cannot
-          // be recognized as implementing the interface from the other loader.
-          ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
-          try {
-            // Set the class loader to ensure FileSystem implementations are
-            // loaded by the same class loader to avoid ConfigurationError
-            Thread.currentThread().setContextClassLoader(currentClassLoader);
-            return path.getFileSystem(hdfsConf);
-          } finally {
-            Thread.currentThread().setContextClassLoader(previousClassLoader);
-          }
+    mUserFs = CacheBuilder.newBuilder().build(new CacheLoader<String, FileSystem>() {
+      @Override
+      public FileSystem load(String userKey) throws Exception {
+        // When running {@link UnderFileSystemContractTest} with hdfs path,
+        // the org.apache.hadoop.fs.FileSystem is loaded by {@link ExtensionClassLoader},
+        // but the org.apache.hadoop.fs.LocalFileSystem is loaded by {@link AppClassLoader}.
+        // When an interface and associated implementation are each loaded
+        // by two separate class loaders, an instance of the class from one loader cannot
+        // be recognized as implementing the interface from the other loader.
+        ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
+        try {
+          // Set the class loader to ensure FileSystem implementations are
+          // loaded by the same class loader to avoid ConfigurationError
+          Thread.currentThread().setContextClassLoader(currentClassLoader);
+          return path.getFileSystem(hdfsConf);
+        } finally {
+          Thread.currentThread().setContextClassLoader(previousClassLoader);
         }
-      });
-    } else {
-      mUserFs = null;
-    }
+      }
+    });
 
     // Create the supported HdfsActiveSyncer if possible.
     HdfsActiveSyncProvider hdfsActiveSyncProvider = new NoopHdfsActiveSyncProvider();
@@ -420,7 +411,8 @@ public class HdfsUnderFileSystem extends ConsistentUnderFileSystem
   @Nullable
   public List<String> getFileLocations(String path, FileLocationOptions options)
       throws IOException {
-    // If the user has hinted the underlying storage nodes are not co-located with Alluxio workers.
+    // If the user has hinted the underlying storage nodes are not co-located with Alluxio
+    // workers, short circuit without querying the locations.
     if (mUfsConf.getBoolean(PropertyKey.UNDERFS_HDFS_REMOTE)) {
       return null;
     }
@@ -887,7 +879,7 @@ public class HdfsUnderFileSystem extends ConsistentUnderFileSystem
   /**
    * @return the underlying HDFS {@link FileSystem} object
    */
-  protected FileSystem getFs() throws IOException {
+  private FileSystem getFs() throws IOException {
     try {
       // TODO(gpang): handle different users
       return mUserFs.get(HDFS_USER);

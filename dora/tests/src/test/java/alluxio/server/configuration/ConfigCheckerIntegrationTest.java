@@ -16,7 +16,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import alluxio.Constants;
-import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.client.meta.MetaMasterClient;
 import alluxio.conf.Configuration;
 import alluxio.conf.PropertyKey;
@@ -33,7 +32,6 @@ import alluxio.wire.InconsistentProperty;
 import com.google.common.collect.ImmutableMap;
 import org.hamcrest.CoreMatchers;
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -122,9 +120,6 @@ public class ConfigCheckerIntegrationTest extends BaseIntegrationTest {
   }
 
   @Test
-  @Ignore
-  @DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "jiacheng",
-      comment = "revisit HA")
   public void multiNodes() throws Exception {
     PropertyKey key = PropertyKey.UNDERFS_WEB_CONNECTION_TIMEOUT;
     // Prepare properties

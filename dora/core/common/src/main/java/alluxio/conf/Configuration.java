@@ -14,7 +14,6 @@ package alluxio.conf;
 import alluxio.Constants;
 import alluxio.RuntimeConstants;
 import alluxio.conf.path.PathConfiguration;
-import alluxio.conf.reference.ReferenceProperty;
 import alluxio.exception.status.AlluxioStatusException;
 import alluxio.exception.status.UnauthenticatedException;
 import alluxio.exception.status.UnavailableException;
@@ -47,7 +46,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
@@ -432,18 +430,6 @@ public final class Configuration
   }
 
   /**
-   * Compares and swap the two conf.
-   *
-   * @param conf the old config
-   * @param newConf the new config
-   * @return whether the compare and set successful
-   */
-  public static boolean compareAndSetServerConfigReference(InstancedConfiguration conf,
-      InstancedConfiguration newConf) {
-    return SERVER_CONFIG_REFERENCE.compareAndSet(conf, newConf);
-  }
-
-  /**
    * Loads configuration from meta master in one RPC.
    *
    * @param address the meta master address
@@ -607,7 +593,6 @@ public final class Configuration
           Optional<Properties> properties = loadProperties(fileInputStream);
           if (properties.isPresent()) {
             alluxioProperties.merge(properties.get(), Source.siteProperty(file));
-            overloadWithReferenceProperty(alluxioProperties);
             conf = new InstancedConfiguration(alluxioProperties);
             conf.validate();
             SERVER_CONFIG_REFERENCE.set(conf);
@@ -629,7 +614,6 @@ public final class Configuration
           Optional<Properties> properties = loadProperties(stream);
           if (properties.isPresent()) {
             alluxioProperties.merge(properties.get(), Source.siteProperty(resource.getPath()));
-            overloadWithReferenceProperty(alluxioProperties);
             conf = new InstancedConfiguration(alluxioProperties);
             conf.validate();
             SERVER_CONFIG_REFERENCE.set(conf);
@@ -641,14 +625,6 @@ public final class Configuration
     }
     conf.validate();
     SERVER_CONFIG_REFERENCE.set(conf);
-  }
-
-  private static void overloadWithReferenceProperty(AlluxioProperties alluxioProperties) {
-    // try to load from classpath
-    for (final ReferenceProperty property : ServiceLoader.load(ReferenceProperty.class,
-        ReferenceProperty.class.getClassLoader())) {
-      alluxioProperties.merge(property.getProperties(), Source.REFERENCE);
-    }
   }
 
   /**

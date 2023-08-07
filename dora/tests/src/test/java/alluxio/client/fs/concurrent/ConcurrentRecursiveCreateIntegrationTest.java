@@ -15,7 +15,6 @@ import static junit.framework.TestCase.assertTrue;
 
 import alluxio.AlluxioURI;
 import alluxio.Constants;
-import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.client.file.FileSystem;
 import alluxio.conf.Configuration;
 import alluxio.conf.PropertyKey;
@@ -29,7 +28,6 @@ import alluxio.underfs.UnderFileSystem.Factory;
 import alluxio.util.CommonUtils;
 import alluxio.util.io.PathUtils;
 
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -44,9 +42,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * Tests the correctness of concurrent recursive creates.
  */
-@Ignore
-@DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "bowen",
-    comment = "redefine behaviors")
 public class ConcurrentRecursiveCreateIntegrationTest extends BaseIntegrationTest {
   private static final int NUM_TOP_LEVEL_DIRS = 10;
 
