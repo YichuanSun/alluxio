@@ -402,8 +402,7 @@ public class UfsUrl {
    * @return a corresponding AlluxioURI object
    */
   public AlluxioURI toAlluxioURI() {
-    return new AlluxioURI(mProto.getScheme(),
-        Authority.fromString(mProto.getAuthority()), getFullPath());
+    return new AlluxioURI(this);
   }
 
   /**
