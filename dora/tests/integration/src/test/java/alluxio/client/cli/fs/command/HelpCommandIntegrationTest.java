@@ -69,6 +69,7 @@ public final class HelpCommandIntegrationTest extends AbstractFileSystemShellTes
   @Test
   public void helpAllCommand() throws IOException {
     Assert.assertEquals(0, sFsShell.run("help"));
+
     final Map<String, Command> commands =
         FileSystemShellUtils.loadCommands(FileSystemContext.create(Configuration.global()));
     String expected = "";
