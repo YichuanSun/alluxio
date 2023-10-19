@@ -21,5 +21,5 @@ comment:
   require_base: no        # [yes :: must have a base report to post]
   require_head: yes       # [yes :: must have a head report to post]
   branches:               # branch names that can post comment
-    - master
+    - main
   after_n_builds: 1 #e.g., 5. The number of uploaded reports codecov
