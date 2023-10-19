@@ -55,5 +55,6 @@ if [ -n "${ALLUXIO_MVN_TESTS}" ]; then
 fi
 
 # Run tests
-mvn -Duser.home=/home/jenkins test -Dmaven.main.skip -Dskip.protoc=true -Dmaven.javadoc.skip -Dlicense.skip=true \
--Dcheckstyle.skip=true -Dfindbugs.skip=true -Dsort.skip -Dsurefire.forkCount=${ALLUXIO_FORK_COUNT} ${mvn_args}
+mvn -Duser.home=/home/jenkins test -Pjacoco -Pdeveloper -Dmaven.main.skip -Dskip.protoc=true \
+-Dmaven.javadoc.skip -Dlicense.skip=true -Dcheckstyle.skip=true \
+-Dfindbugs.skip=true -Dsort.skip -Dsurefire.forkCount=${ALLUXIO_FORK_COUNT} ${mvn_args}
