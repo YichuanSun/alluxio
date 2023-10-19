@@ -56,6 +56,5 @@ fi
 
 # Generate coverage reports (must be done in separate step)
 mvn -T 2C -Dfindbugs.skip -Dcheckstyle.skip -DskipTests -Dmaven.javadoc.skip -Dlicense.skip \
--PjacocoReport jacoco:report -pl '!webui,!shaded,!shaded/client,!shaded/hadoop' \
--Djacoco.dataFile='${build.path}/../target/jacoco-combined.exec' \
+-PjacocoReport jacoco:report -Djacoco.dataFile='${build.path}/../target/jacoco-combined.exec' \
 -Dsort.skip -Dsurefire.forkCount=${ALLUXIO_FORK_COUNT} ${mvn_args}
