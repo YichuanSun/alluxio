@@ -15,15 +15,19 @@
 #
 set -ex
 
-if [ -n "${ALLUXIO_GIT_CLEAN}" ]
-then
+if [ -z "${ALLUXIO_FORK_COUNT}" ]; then
+  ALLUXIO_FORK_COUNT=2
+fi
+
+if [ -n "${ALLUXIO_GIT_CLEAN}" ]; then
+  # https://stackoverflow.com/questions/72978485/git-submodule-update-failed-with-fatal-detected-dubious-ownership-in-repositor
+  git config --global --add safe.directory '*'
   git clean -fdx
 fi
 
 mvn_args=""
-if [ -n "${ALLUXIO_MVN_RUNTOEND}" ]
-then
-  mvn_args+=" -fn -DfailIfNoTests=false --fail-at-end"
+if [ -n "${ALLUXIO_MVN_PROJECT_LIST}" ]; then
+  mvn_args+="-am -pl ${ALLUXIO_MVN_PROJECT_LIST}"
 fi
 
 export MAVEN_OPTS="-Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss.SSS"
@@ -33,8 +37,25 @@ JAVA_HOME_BACKUP=${JAVA_HOME}
 PATH_BACKUP=${PATH}
 JAVA_HOME=/usr/local/openjdk-8
 PATH=$JAVA_HOME/bin:$PATH
+mvn -Duser.home=/home/jenkins -T 4C clean install -Dfindbugs.skip -Dcheckstyle.skip -DskipTests -Dmaven.javadoc.skip \
+-Dlicense.skip -Dsort.skip ${mvn_args}
+
+# Set things up so that the current user has a real name and can authenticate.
+myuid=$(id -u)
+mygid=$(id -g)
+echo "$myuid:x:$myuid:$mygid:anonymous uid:/home/jenkins:/bin/false" >> /etc/passwd
+
+# Revert back to the image default java version to run the test
+JAVA_HOME=${JAVA_HOME_BACKUP}
+PATH=${PATH_BACKUP}
+
+mvn_args+=" -fn -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false --fail-at-end"
+if [ -n "${ALLUXIO_MVN_TESTS}" ]; then
+  mvn_args+=" -Dtest=${ALLUXIO_MVN_TESTS}"
+fi
 
 # Generate coverage reports (must be done in separate step)
 mvn -T 2C -Dfindbugs.skip -Dcheckstyle.skip -DskipTests -Dmaven.javadoc.skip -Dlicense.skip \
 -PjacocoReport jacoco:report -pl '!webui,!shaded,!shaded/client,!shaded/hadoop' \
--Djacoco.dataFile='${build.path}/../target/jacoco-combined.exec'
+-Djacoco.dataFile='${build.path}/../target/jacoco-combined.exec' \
+-Dsort.skip -Dsurefire.forkCount=${ALLUXIO_FORK_COUNT} ${mvn_args}
