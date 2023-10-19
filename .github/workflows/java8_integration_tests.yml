@@ -55,7 +55,7 @@ jobs:
       - name: Run tests
         id: test0
         run: |
-          mkdir -p ~/.m2 \
+          mkdir -p ~/.m2
           ALLUXIO_DOCKER_ID=0 \
           ALLUXIO_DOCKER_NO_TTY=true \
           ALLUXIO_DOCKER_GIT_CLEAN=true \
@@ -69,7 +69,7 @@ jobs:
         # skip generating+uploading coverage on these matrix modules because they are flaky
         if: ${{ matrix.modules != 'alluxio.server.ft.**,!alluxio.server.ft.journal.raft.**,!alluxio.server.ft.journal.ufs.**' && matrix.modules != 'alluxio.client.cli.**,!alluxio.client.cli.fs.**' }}
         run: |
-          mkdir -p ~/.m2 \
+          mkdir -p ~/.m2
           ALLUXIO_DOCKER_NO_TTY=true \
           ALLUXIO_COVERAGE_REPORT=true \
           ALLUXIO_DOCKER_MVN_RUNTOEND=true \
