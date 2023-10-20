@@ -37,8 +37,6 @@ JAVA_HOME_BACKUP=${JAVA_HOME}
 PATH_BACKUP=${PATH}
 JAVA_HOME=/usr/local/openjdk-8
 PATH=$JAVA_HOME/bin:$PATH
-mvn -Duser.home=/home/jenkins -T 4C clean install -Dfindbugs.skip -Dcheckstyle.skip -DskipTests -Dmaven.javadoc.skip \
--Dlicense.skip -Dsort.skip ${mvn_args}
 
 # Set things up so that the current user has a real name and can authenticate.
 myuid=$(id -u)
@@ -56,9 +54,8 @@ fi
 
 ## Generate coverage reports (must be done in separate step)
 #mvn -T 2C -Dfindbugs.skip -Dcheckstyle.skip -DskipTests -Dmaven.javadoc.skip -Dlicense.skip \
-#-PjacocoReport jacoco:report -pl '!webui,!shaded,!shaded/client,!shaded/hadoop' \
-#-Djacoco.dataFile='${build.path}/../target/jacoco-combined.exec' \
-#-Dsort.skip -Dsurefire.forkCount=${ALLUXIO_FORK_COUNT} ${mvn_args}
+#-PjacocoReport jacoco:report \
+#-Djacoco.dataFile='${build.path}/../target/jacoco-combined.exec'
 
 # Run tests
 mvn -Duser.home=/home/jenkins -PjacocoReport jacoco:report -Dmaven.main.skip -Dskip.protoc=true \

@@ -57,7 +57,6 @@ jobs:
           mkdir -p ~/.m2
           ALLUXIO_DOCKER_NO_TTY=true \
           ALLUXIO_COVERAGE_REPORT=true \
-          ALLUXIO_DOCKER_MVN_RUNTOEND=true \
           dev/github/run_docker.sh
         timeout-minutes: 60
 
