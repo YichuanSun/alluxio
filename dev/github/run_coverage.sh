@@ -52,11 +52,6 @@ if [ -n "${ALLUXIO_MVN_TESTS}" ]; then
   mvn_args+=" -Dtest=${ALLUXIO_MVN_TESTS}"
 fi
 
-## Generate coverage reports (must be done in separate step)
-#mvn -T 2C -Dfindbugs.skip -Dcheckstyle.skip -DskipTests -Dmaven.javadoc.skip -Dlicense.skip \
-#-PjacocoReport jacoco:report \
-#-Djacoco.dataFile='${build.path}/../target/jacoco-combined.exec'
-
 # Run tests
 mvn -Duser.home=/home/jenkins -PjacocoReport jacoco:report -Dmaven.main.skip -Dskip.protoc=true \
 -Dmaven.javadoc.skip -Dlicense.skip=true -Dcheckstyle.skip=true -DskipTests \
