@@ -10,8 +10,8 @@ jobs:
       fail-fast: false
       matrix:
         modules:
-#          - >-
-#            !alluxio.client.**,!alluxio.master.**
+          - >-
+            !alluxio.client.**,!alluxio.master.**
           - >-
             alluxio.client.**,alluxio.master.**
 
