@@ -80,6 +80,7 @@ function main {
     run_args+=" --entrypoint=dev/github/run_checks.sh"
   else
     run_args+=" --entrypoint=dev/github/run_tests.sh"
+  fi
 
   docker run ${run_args} ${ALLUXIO_DOCKER_IMAGE}
 }
