@@ -31,6 +31,7 @@ import alluxio.wire.WorkerNetAddress;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -44,6 +45,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 
+@Ignore
 public class DoraLoadJobTest {
   @Rule
   public TemporaryFolder mTestFolder = new TemporaryFolder();

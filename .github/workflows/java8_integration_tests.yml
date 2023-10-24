@@ -62,6 +62,16 @@ jobs:
           dev/github/run_docker.sh
         timeout-minutes: 60
 
+      - name: Generate coverage report
+        id: cov0
+        # skip generating+uploading coverage on these matrix modules because they are flaky
+        run: |
+          mkdir -p ~/.m2
+          ALLUXIO_DOCKER_NO_TTY=true \
+          ALLUXIO_COVERAGE_REPORT=true \
+          dev/github/run_docker.sh
+        timeout-minutes: 60
+
       - name: Archive artifacts
         continue-on-error: true
         uses: actions/upload-artifact@v3
@@ -73,3 +83,12 @@ jobs:
             **/target/artifacts/*
             **/target/logs/*
           retention-days: 7
+
+      - name: "Upload Code Coverage Report"
+        uses: codecov/codecov-action@v1
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          name: codecov-umbrella
+          fail_ci_if_error: true
+          verbose: true
