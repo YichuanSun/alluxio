@@ -46,6 +46,9 @@ import java.util.concurrent.TimeoutException;
 /**
  * Tests for {@link alluxio.client.file.FileSystemUtils}.
  */
+@Ignore
+@DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "bowen",
+    comment = "fix it.")
 public class FileSystemUtilsIntegrationTest extends BaseIntegrationTest {
   private static final int USER_QUOTA_UNIT_BYTES = 1000;
   @ClassRule

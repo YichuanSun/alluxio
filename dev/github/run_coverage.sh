@@ -37,8 +37,6 @@ JAVA_HOME_BACKUP=${JAVA_HOME}
 PATH_BACKUP=${PATH}
 JAVA_HOME=/usr/local/openjdk-8
 PATH=$JAVA_HOME/bin:$PATH
-mvn -Duser.home=/home/jenkins -T 4C clean install -Dfindbugs.skip -Dcheckstyle.skip -DskipTests -Dmaven.javadoc.skip \
--Dlicense.skip ${mvn_args}
 
 # Set things up so that the current user has a real name and can authenticate.
 myuid=$(id -u)
@@ -55,6 +53,7 @@ if [ -n "${ALLUXIO_MVN_TESTS}" ]; then
 fi
 
 # Run tests
-mvn -Duser.home=/home/jenkins test -Pjacoco -Dmaven.main.skip -Dskip.protoc=true \
--Dmaven.javadoc.skip -Dlicense.skip=true -Dcheckstyle.skip=true \
+mvn -Duser.home=/home/jenkins -PjacocoReport jacoco:report -Dmaven.main.skip -Dskip.protoc=true \
+-Dmaven.javadoc.skip -Dlicense.skip=true -Dcheckstyle.skip=true -DskipTests \
+-Djacoco.dataFile='${build.path}/../target/jacoco-combined.exec' \
 -Dfindbugs.skip=true -Dsort.skip -Dsurefire.forkCount=${ALLUXIO_FORK_COUNT} ${mvn_args}

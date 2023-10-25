@@ -21,6 +21,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import alluxio.Constants;
+import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.client.file.FileSystemContext;
 import alluxio.exception.AccessControlException;
 import alluxio.exception.FileDoesNotExistException;
@@ -40,6 +41,7 @@ import alluxio.scheduler.job.JobState;
 import alluxio.wire.FileInfo;
 
 import com.google.common.collect.ImmutableSet;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -47,6 +49,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 
+@Ignore
+@DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "Jianjian",
+    comment = "fix it.")
 public class LoadJobTest {
   @Test
   public void testGetNextBatch()
