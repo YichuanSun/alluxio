@@ -96,7 +96,6 @@ public class LoadJobTest {
       throws FileDoesNotExistException, AccessControlException, IOException, InvalidPathException {
     List<FileInfo> fileInfos = generateRandomFileInfo(100, 5, 64 * 1024 * 1024);
     FileSystemMaster fileSystemMaster = mock(FileSystemMaster.class);
-
     when(fileSystemMaster.listStatus(any(), any())).thenReturn(fileInfos);
     FileIterable files = new FileIterable(fileSystemMaster, "test", Optional.of("user"), false,
         LoadJob.QUALIFIED_FILE_FILTER);
