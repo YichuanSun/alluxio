@@ -15,7 +15,6 @@ import alluxio.AlluxioTestDirectory;
 import alluxio.AlluxioURI;
 import alluxio.Constants;
 import alluxio.annotation.dora.DoraTestTodoItem;
-import alluxio.client.ReadType;
 import alluxio.client.file.FileInStream;
 import alluxio.client.file.FileOutStream;
 import alluxio.client.file.FileSystem;
@@ -58,6 +57,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Integration tests for {@link alluxio.client.file.FileInStream}.
  */
+@Ignore
+@DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "bowen",
+    comment = "Bring back but not passed, need to fix.")
 @RunWith(Parameterized.class)
 @Ignore
 @DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "jiaming",

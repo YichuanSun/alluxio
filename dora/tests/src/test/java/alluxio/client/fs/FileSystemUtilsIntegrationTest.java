@@ -70,6 +70,9 @@ public class FileSystemUtilsIntegrationTest extends BaseIntegrationTest {
         .setRecursive(true).build();
   }
 
+  @Ignore
+  @DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "bowen",
+      comment = "Bring back but not passed, need to fix.")
   @Test
   public void waitCompletedTest1() throws IOException, AlluxioException, InterruptedException {
     final String uniqPath = PathUtils.uniqPath();

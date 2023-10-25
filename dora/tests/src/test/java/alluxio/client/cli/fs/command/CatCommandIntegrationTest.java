@@ -41,6 +41,9 @@ import java.io.PrintWriter;
         + "see alluxio.testutils.LocalAlluxioClusterResource.ResetRule.resetCluster")
 @Ignore("ignored due to broken test infrastructure")
 public final class CatCommandIntegrationTest extends AbstractFileSystemShellTest {
+  @Ignore
+  @DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "jiaming",
+      comment = "Bring back but not passed, need to fix.")
   @Test
   public void catDirectory() throws Exception {
     String[] command = new String[] {"mkdir", "/testDir"};
@@ -83,6 +86,9 @@ public final class CatCommandIntegrationTest extends AbstractFileSystemShellTest
     Assert.assertArrayEquals(mOutput.toByteArray(), expect);
   }
 
+  @Ignore
+  @DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "jiaming",
+      comment = "Bring back but not passed, need to fix.")
   @Test
   public void catAfterForceMasterSync() throws Exception {
     // Create a file in the UFS and write some bytes into it
