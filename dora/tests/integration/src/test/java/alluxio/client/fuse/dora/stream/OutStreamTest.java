@@ -147,6 +147,7 @@ public class OutStreamTest extends AbstractStreamTest {
     AlluxioURI alluxioURI = getTestFileAlluxioUri();
     mFileSystem.createDirectory(alluxioURI.getParent(),
         CreateDirectoryPOptions.newBuilder().setRecursive(true).build());
+
     try (FuseFileStream outStream = createStream(alluxioURI, false)) {
       ByteBuffer buffer = BufferUtils.getIncreasingByteBuffer(DEFAULT_FILE_LEN);
       outStream.write(buffer, DEFAULT_FILE_LEN, 0);
