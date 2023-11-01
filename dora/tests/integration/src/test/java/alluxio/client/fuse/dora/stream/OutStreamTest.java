@@ -160,6 +160,7 @@ public class OutStreamTest extends AbstractStreamTest {
   public void openExistingTruncateFuture() throws Exception {
     AlluxioURI alluxioURI = getTestFileAlluxioUri();
     writeIncreasingByteArrayToFile(alluxioURI, DEFAULT_FILE_LEN);
+
     try (FuseFileStream outStream = createStream(alluxioURI, false)) {
       // Alluxio does not support append to existing file
       outStream.truncate(DEFAULT_FILE_LEN * 2);
