@@ -27,7 +27,7 @@ fi
 
 mvn_compile_args=""
 if [ -n "${ALLUXIO_MVN_PROJECT_LIST_COMPILE}" ]; then
-  mvn_compile_args+="-am -pl ${ALLUXIO_MVN_PROJECT_LIST_COMPILE}"
+  mvn_compile_args+=" -pl ${ALLUXIO_MVN_PROJECT_LIST_COMPILE}"
 fi
 
 export MAVEN_OPTS="-Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss.SSS"
@@ -57,7 +57,7 @@ if [ -n "${ALLUXIO_MVN_TESTS}" ]; then
 fi
 
 if [ -n "${ALLUXIO_MVN_PROJECT_LIST_TEST}" ]; then
-  mvn_test_args+=" -am -pl ${ALLUXIO_MVN_PROJECT_LIST_TEST}"
+  mvn_test_args+=" -pl ${ALLUXIO_MVN_PROJECT_LIST_TEST}"
 fi
 
 # Run tests
