@@ -340,6 +340,10 @@ public class MembershipManagerTest {
     wkrHosts.add(wkr1.getAddress().getHost());
     wkrHosts.add(wkr2.getAddress().getHost());
     wkrHosts.add(wkr3.getAddress().getHost());
+    System.out.println("????!!!!");
+    System.out.println(wkr1);
+    System.out.println(wkr2);
+    System.out.println(wkr3);
     // As for static membership mgr, only hostnames are provided in the static file
     List<String> allMemberHosts = membershipManager.getAllMembers().stream()
         .map(w -> w.getAddress().getHost())
