@@ -338,7 +338,13 @@ public class MembershipManagerTest {
     membershipManager.join(wkr3);
     List<String> wkrHosts = new ArrayList<>();
     wkrHosts.add(wkr1.getAddress().getHost());
+    for (WorkerInfo workerInfo : membershipManager.getAllMembers()) {
+      System.out.println(workerInfo.getAddress().toString());
+    }
     wkrHosts.add(wkr2.getAddress().getHost());
+    for (WorkerInfo workerInfo : membershipManager.getAllMembers()) {
+      System.out.println(workerInfo.getAddress().toString());
+    }
     wkrHosts.add(wkr3.getAddress().getHost());
     System.out.println("????!!!!");
     for (WorkerInfo workerInfo : membershipManager.getAllMembers()) {
