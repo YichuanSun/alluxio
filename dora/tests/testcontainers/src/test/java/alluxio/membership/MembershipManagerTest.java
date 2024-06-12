@@ -445,8 +445,18 @@ public class MembershipManagerTest {
     membershipManager.join(wkr3);
     List<String> wkrHosts = new ArrayList<>();
     wkrHosts.add(wkr1.getAddress().getHost());
+    for (WorkerInfo workerInfo : membershipManager.getAllMembers()) {
+      System.out.println(workerInfo.getAddress().toString());
+    }
     wkrHosts.add(wkr2.getAddress().getHost());
+    for (WorkerInfo workerInfo : membershipManager.getAllMembers()) {
+      System.out.println(workerInfo.getAddress().toString());
+    }
     wkrHosts.add(wkr3.getAddress().getHost());
+    System.out.println("????!!!!");
+    for (WorkerInfo workerInfo : membershipManager.getAllMembers()) {
+      System.out.println(workerInfo.getAddress().toString());
+    }
     // As for static membership mgr, only hostnames are provided in the static file
     List<String> allMemberHosts = membershipManager.getAllMembers().stream()
         .map(w -> w.getAddress().getHost())
