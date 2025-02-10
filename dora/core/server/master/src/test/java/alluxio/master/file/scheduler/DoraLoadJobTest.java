@@ -80,7 +80,6 @@ public class DoraLoadJobTest {
                 new WorkerNetAddress().setHost("worker1").setRpcPort(1234)));
     List<DoraLoadJob.DoraLoadTask> tasks = loadJob.getNextTasks(workers);
     List<LoadSubTask> subTasks = tasks.get(0).getSubTasks();
-
     assertEquals(3, subTasks.size());
     for (LoadSubTask subTask : subTasks) {
       if (subTask instanceof LoadMetadataSubTask) {
