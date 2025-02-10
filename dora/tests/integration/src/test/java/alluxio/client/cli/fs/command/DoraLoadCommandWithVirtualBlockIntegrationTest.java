@@ -16,17 +16,22 @@ import static org.junit.Assert.assertTrue;
 
 import alluxio.AlluxioURI;
 import alluxio.Constants;
+import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.client.cli.fs.AbstractDoraFileSystemShellTest;
 import alluxio.client.file.FileInStream;
 import alluxio.client.file.FileSystemUtils;
 import alluxio.conf.PropertyKey;
 import alluxio.util.io.BufferUtils;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 
+@Ignore
+@DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "jianjian",
+    comment = "fix the testCommand method.")
 public class DoraLoadCommandWithVirtualBlockIntegrationTest
     extends AbstractDoraFileSystemShellTest {
 

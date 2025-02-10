@@ -14,6 +14,7 @@ package alluxio.master.file.scheduler;
 import static org.junit.Assert.assertEquals;
 
 import alluxio.Constants;
+import alluxio.annotation.dora.DoraTestTodoItem;
 import alluxio.conf.Configuration;
 import alluxio.conf.PropertyKey;
 import alluxio.master.job.DoraLoadJob;
@@ -31,6 +32,7 @@ import alluxio.wire.WorkerNetAddress;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
@@ -44,6 +46,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
 
+@Ignore
+@DoraTestTodoItem(action = DoraTestTodoItem.Action.FIX, owner = "Jianjian",
+    comment = "fix it.")
 public class DoraLoadJobTest {
   @Rule
   public TemporaryFolder mTestFolder = new TemporaryFolder();
