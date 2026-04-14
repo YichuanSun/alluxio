@@ -13,6 +13,7 @@ package alluxio.network.protocol.databuffer;
 
 import com.google.common.base.Preconditions;
 import io.netty.channel.DefaultFileRegion;
+import io.netty.channel.FileRegion;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,8 +25,7 @@ import java.nio.channels.FileChannel;
  * A DataBuffer with the underlying data being a {@link FileChannel}.
  */
 public final class DataFileChannel implements DataBuffer {
-  private final File mFile;
-  private final long mOffset;
+  private final FileRegion mFileRegion;
   private final long mLength;
 
   /**
@@ -35,14 +35,28 @@ public final class DataFileChannel implements DataBuffer {
    * @param length The length of the data to read
    */
   public DataFileChannel(File file, long offset, long length) {
-    mFile = Preconditions.checkNotNull(file, "file");
-    mOffset = offset;
+    this(new DefaultFileRegion(Preconditions.checkNotNull(file, "file"), offset, length), length);
+  }
+
+  /**
+   *
+   * @param fileChannel The open file channel
+   * @param offset The offset into the FileChannel
+   * @param length The length of the data to read
+   */
+  public DataFileChannel(FileChannel fileChannel, long offset, long length) {
+    this(new DefaultFileRegion(Preconditions.checkNotNull(fileChannel, "fileChannel"),
+        offset, length), length);
+  }
+
+  private DataFileChannel(FileRegion fileRegion, long length) {
+    mFileRegion = fileRegion;
     mLength = length;
   }
 
   @Override
   public Object getNettyOutput() {
-    return new DefaultFileRegion(mFile, mOffset, mLength);
+    return mFileRegion;
   }
 
   @Override
@@ -75,12 +89,14 @@ public final class DataFileChannel implements DataBuffer {
   public int readableBytes() {
     int lengthInt = (int) mLength;
     Preconditions.checkArgument(mLength == (long) lengthInt,
-        "size of file %s is %s, cannot be cast to int", mFile, mLength);
+        "size of data is %s, cannot be cast to int", mLength);
     return lengthInt;
   }
 
   @Override
   public void release() {
-    // Nothing we need to release explicitly, let GC take care of all objects.
+    if (mFileRegion.refCnt() > 0) {
+      mFileRegion.release();
+    }
   }
 }

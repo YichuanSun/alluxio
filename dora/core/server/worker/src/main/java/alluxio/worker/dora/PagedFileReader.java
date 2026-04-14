@@ -115,29 +115,36 @@ public class PagedFileReader extends BlockReader implements PositionReader {
     List<DataBuffer> dataBufferList = new ArrayList<>();
     long bytesToTransfer = Math.min(length, mFileSize - mPos);
     long bytesToTransferLeft = bytesToTransfer;
-    while (bytesToTransferLeft > 0) {
-      long lengthPerOp = Math.min(bytesToTransferLeft, mPositionReader.getPageSize());
-      DataBuffer dataBuffer;
-      Optional<DataFileChannel> dataFileChannel =
-          mPositionReader.getDataFileChannel(mPos, (int) lengthPerOp);
-      if (!dataFileChannel.isPresent()) {
-        dataBuffer = getDataBufferByCopying(channel, (int) lengthPerOp);
-      } else {
-        // update mPos
-        // TODO(JiamingMai): need to lock page files since the openFile op is called in netty latter
-        dataBuffer = dataFileChannel.get();
-        if (dataBuffer.getLength() > 0) {
-          mPos += dataBuffer.getLength();
-        } else {
+    try {
+      while (bytesToTransferLeft > 0) {
+        long lengthPerOp = Math.min(bytesToTransferLeft, mPositionReader.getPageSize());
+        DataBuffer dataBuffer;
+        Optional<DataFileChannel> dataFileChannel =
+            mPositionReader.getDataFileChannel(mPos, (int) lengthPerOp);
+        if (!dataFileChannel.isPresent()) {
           dataBuffer = getDataBufferByCopying(channel, (int) lengthPerOp);
+        } else {
+          // update mPos
+          dataBuffer = dataFileChannel.get();
+          if (dataBuffer.getLength() > 0) {
+            mPos += dataBuffer.getLength();
+          } else {
+            dataBuffer.release();
+            dataBuffer = getDataBufferByCopying(channel, (int) lengthPerOp);
+          }
         }
+        // update bytesToTransferLeft
+        bytesToTransferLeft -= dataBuffer.getLength();
+        dataBufferList.add(dataBuffer);
       }
-      // update bytesToTransferLeft
-      bytesToTransferLeft -= dataBuffer.getLength();
-      dataBufferList.add(dataBuffer);
+      CompositeDataBuffer compositeDataBuffer = new CompositeDataBuffer(dataBufferList);
+      return compositeDataBuffer;
+    } catch (Throwable e) {
+      for (DataBuffer dataBuffer : dataBufferList) {
+        dataBuffer.release();
+      }
+      throw e;
     }
-    CompositeDataBuffer compositeDataBuffer = new CompositeDataBuffer(dataBufferList);
-    return compositeDataBuffer;
   }
 
   private DataBuffer getDataBufferByCopying(Channel channel, int len) throws IOException {

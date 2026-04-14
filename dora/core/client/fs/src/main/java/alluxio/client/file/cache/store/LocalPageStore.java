@@ -25,18 +25,19 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import org.apache.commons.io.FileUtils;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import javax.annotation.concurrent.NotThreadSafe;
 
 /**
@@ -222,33 +223,45 @@ public class LocalPageStore implements PageStore {
     Preconditions.checkArgument(!isTemporary,
         "cannot acquire a data file channel to a temporary page");
     Path pagePath = getPagePath(pageId, isTemporary);
-    File pageFile = pagePath.toFile();
-    if (!pageFile.exists()) {
-      throw new PageNotFoundException(pagePath.toString());
+    FileChannel fileChannel;
+    try {
+      fileChannel = FileChannel.open(pagePath, StandardOpenOption.READ);
+    } catch (IOException e) {
+      throw new PageNotFoundException(pagePath.toString(), e);
     }
-
-    long fileLength = pageFile.length();
-    if (fileLength == 0 && pageId.getPageIndex() > 0) {
-      // pages other than the first page should always be non-empty
-      // remove this malformed page
-      SAMPLING_LOG.warn("Length of page {} is 0, removing this malformed page", pageId);
+    try {
+      long fileLength = fileChannel.size();
+      if (fileLength == 0 && pageId.getPageIndex() > 0) {
+        // pages other than the first page should always be non-empty
+        // remove this malformed page
+        SAMPLING_LOG.warn("Length of page {} is 0, removing this malformed page", pageId);
+        fileChannel.close();
+        try {
+          Files.deleteIfExists(pagePath);
+        } catch (IOException ignored) {
+          // do nothing
+        }
+        throw new PageNotFoundException(pagePath.toString());
+      }
+      if (fileLength < pageOffset) {
+        throw new IllegalArgumentException(
+            String.format("offset %s exceeds length of page %s", pageOffset, fileLength));
+      }
+      if (pageOffset + bytesToRead > fileLength) {
+        bytesToRead = (int) (fileLength - (long) pageOffset);
+      }
+      return new DataFileChannel(fileChannel, pageOffset, bytesToRead);
+    } catch (IOException | RuntimeException e) {
       try {
-        Files.deleteIfExists(pagePath);
+        fileChannel.close();
       } catch (IOException ignored) {
         // do nothing
       }
-      throw new PageNotFoundException(pagePath.toString());
+      if (e instanceof RuntimeException) {
+        throw (RuntimeException) e;
+      }
+      throw new PageNotFoundException(pagePath.toString(), e);
     }
-    if (fileLength < pageOffset) {
-      throw new IllegalArgumentException(
-          String.format("offset %s exceeds length of page %s", pageOffset, fileLength));
-    }
-    if (pageOffset + bytesToRead > fileLength) {
-      bytesToRead = (int) (fileLength - (long) pageOffset);
-    }
-
-    DataFileChannel dataFileChannel = new DataFileChannel(pageFile, pageOffset, bytesToRead);
-    return dataFileChannel;
   }
 
   @Override

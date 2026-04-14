@@ -1190,17 +1190,56 @@ public final class LocalCacheManagerTest {
         0, PAGE1.length, cacheContext);
     assertNotNull(dataFileChannel);
     assertEquals(dataFileChannel.isPresent(), true);
-    assertEquals(dataFileChannel.get().getNettyOutput() instanceof DefaultFileRegion, true);
+    Object nettyOutput = dataFileChannel.get().getNettyOutput();
+    assertTrue(nettyOutput instanceof DefaultFileRegion);
+    DefaultFileRegion defaultFileRegion = (DefaultFileRegion) nettyOutput;
+
+    try {
+      ByteBuf buf = Unpooled.buffer(PAGE1.length);
+      try {
+        NettyBufTargetBuffer targetBuffer = new NettyBufTargetBuffer(buf);
+        long bytesTransferred = defaultFileRegion.transferTo(targetBuffer.byteChannel(), 0);
+        assertEquals(bytesTransferred, PAGE1.length);
+
+        byte[] bytes = new byte[PAGE1.length];
+        buf.readBytes(bytes);
+        assertArrayEquals(PAGE1, bytes);
+      } finally {
+        buf.release();
+      }
+    } finally {
+      defaultFileRegion.release();
+    }
+  }
+
+  @Test
+  public void getDataFileChannelCanReadAfterPageDelete() throws Exception {
+    mCacheManager = createLocalCacheManager();
+    mCacheManager.put(PAGE_ID1, PAGE1);
+    Optional<DataFileChannel> dataFileChannel = mCacheManager.getDataFileChannel(PAGE_ID1,
+        0, PAGE1.length, CacheContext.defaults());
+    assertNotNull(dataFileChannel);
+    assertTrue(dataFileChannel.isPresent());
     DefaultFileRegion defaultFileRegion =
         (DefaultFileRegion) dataFileChannel.get().getNettyOutput();
-    ByteBuf buf = Unpooled.buffer(PAGE1.length);
-    NettyBufTargetBuffer targetBuffer = new NettyBufTargetBuffer(buf);
-    long bytesTransferred = defaultFileRegion.transferTo(targetBuffer.byteChannel(), 0);
-    assertEquals(bytesTransferred, PAGE1.length);
 
-    byte[] bytes = new byte[PAGE1.length];
-    buf.readBytes(bytes);
-    assertArrayEquals(PAGE1, bytes);
+    try {
+      assertTrue(mCacheManager.delete(PAGE_ID1));
+      ByteBuf buf = Unpooled.buffer(PAGE1.length);
+      try {
+        NettyBufTargetBuffer targetBuffer = new NettyBufTargetBuffer(buf);
+        long bytesTransferred = defaultFileRegion.transferTo(targetBuffer.byteChannel(), 0);
+        assertEquals(PAGE1.length, bytesTransferred);
+
+        byte[] bytes = new byte[PAGE1.length];
+        buf.readBytes(bytes);
+        assertArrayEquals(PAGE1, bytes);
+      } finally {
+        buf.release();
+      }
+    } finally {
+      defaultFileRegion.release();
+    }
   }
 
   /**
